@@ -54,14 +54,14 @@
       background-color: #e2e8f0;
     }
     .btn-back {
-      background-color: #0ea5e9;
+      background-color: #1d4ed8;
       color: white;
       font-weight: 500;
       border-radius: 8px;
       padding: 10px 20px;
     }
     .btn-back:hover {
-      background-color: #0284c7;
+      background-color: #1e40af;
     }
     h2 {
       font-weight: 700;
