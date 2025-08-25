@@ -90,7 +90,6 @@
 <div class="container py-5">
   <h2 class="text-center mb-5">Cek Kompetensi Karyawan</h2>
 
-  <!-- Form Input -->
   <div class="card mb-5">
     <div class="card-header">
       <i class="bi bi-person-badge"></i> Form Input Karyawan
@@ -134,7 +133,6 @@
     </div>
   </div>
 
-  <!-- Tabel Output -->
   <div class="card">
     <div class="card-header">
       <i class="bi bi-clipboard-data"></i> Hasil Rekomendasi Pelatihan
@@ -175,7 +173,6 @@
               <td>Public Speaking</td>
               <td>Leadership & Communication</td>
             </tr>
-            <!-- Data dari backend -->
           </tbody>
         </table>
       </div>
@@ -183,7 +180,6 @@
   </div>
 </div>
 
-<!-- Bootstrap Icon -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 </body>
