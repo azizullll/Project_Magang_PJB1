@@ -12,3 +12,6 @@ Route::get('/', function () {
 Route::get('/cek-kompetensi', function () {
     return view('cek_kompetensi');
 });
+Route::get('/data-karyawan', function () {
+    return view('data_karyawan');
+});
