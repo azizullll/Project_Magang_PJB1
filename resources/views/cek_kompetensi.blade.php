@@ -43,7 +43,7 @@
       background: linear-gradient(90deg, #1d4ed8, #1e40af);
     }
     .btn-reset {
-      background-color: #f1f5f9;
+      background-color: #f9f8f1;
       border: 1px solid #cbd5e1;
       font-weight: 500;
       border-radius: 8px;
@@ -54,14 +54,14 @@
       background-color: #e2e8f0;
     }
     .btn-back {
-      background-color: #0ea5e9;
+      background-color: #1d4ed8;
       color: white;
       font-weight: 500;
       border-radius: 8px;
       padding: 10px 20px;
     }
     .btn-back:hover {
-      background-color: #0284c7;
+      background-color: #1e40af;
     }
     h2 {
       font-weight: 700;
