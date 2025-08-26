@@ -14,12 +14,12 @@
             <span class="logo-text">SkillPath</span>
         </div>
         <ul class="menu">
-            <li><a href="#">Dashboard</a></li>
-            <li><a href="#">Analytics</a></li>
+            <li><a href="dashboard">Dashboard</a></li>
+            <li><a href="input">Input Data</a></li>
             <li class="active"><a href="#">Data Karyawan</a></li>
         </ul>
         <div class="sidebar-footer">
-            <span class="logout-icon">⎋</span>
+            <span class="logout-icon"></span>
         </div>
     </aside>
 
