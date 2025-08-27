@@ -86,24 +86,6 @@
             animation: float 4s ease-in-out infinite;
         }
 
-        .toggle-password-btn {
-            border: none;
-            background: transparent;
-            padding: 0;
-            position: absolute;
-            right: 12px;
-            top: 0;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        .toggle-password-btn i {
-            font-size: 1.2rem;
-            color: #555;
-        }
-
         @keyframes float {
 
             0%,
@@ -119,6 +101,19 @@
         .modal-title {
             width: 100%;
             text-align: center;
+        }
+
+        .form-control.is-valid,
+        .was-validated .form-control:valid {
+            border-color: #0d6efd !important;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: none !important;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+
+        .valid-feedback {
+            color: #0d6efd !important;
+            /* teks feedback juga jadi biru */
         }
     </style>
 
@@ -152,6 +147,7 @@
         </div>
     </section>
 
+    <!-- Modal Login -->
     <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content p-4 rounded-4 shadow-lg">
@@ -160,24 +156,38 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form class="needs-validation" novalidate>
+                        <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label fw-semibold">Email</label>
                             <input type="email" class="form-control rounded-pill" id="email"
-                                placeholder="Masukkan email">
+                                placeholder="Masukkan email" required
+                                pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|student\.polije\.ac\.id)$">
+                            <div class="invalid-feedback">
+                                Email harus menggunakan @gmail.com / @yahoo.com / @outlook.com / @student.polije.ac.id
+                            </div>
                         </div>
 
-                        <div class="mb-3 position-relative">
+                        <!-- Password -->
+                        <div class="mb-3">
                             <label for="password" class="form-label fw-semibold">Password</label>
                             <div class="position-relative">
                                 <input type="password" class="form-control rounded-pill pe-5" id="password"
-                                    placeholder="Masukkan password">
+                                    placeholder="Masukkan password" required minlength="6">
 
-                                <button type="button" id="togglePassword"
-                                    class="position-absolute top-50 end-0 translate-middle-y pe-3"
-                                    style="border: none; background: none; padding: 0;">
-                                    <i class="bi bi-eye-slash"></i>
-                                </button>
+                                <!-- Pesan validasi -->
+                                <div class="invalid-feedback">
+                                    Password minimal 6 karakter
+                                </div>
+
+                                <!-- Show Password di bawah kanan -->
+                                <div class="form-check mt-2 d-flex justify-content-end">
+                                    <input class="form-check-input" type="checkbox" id="togglePasswordCheck">
+                                    <label class="form-check-label ms-2 text-primary fw-semibold"
+                                        for="togglePasswordCheck">
+                                        Show Password
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -188,22 +198,31 @@
         </div>
     </div>
 
-    </div>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
+        // Bootstrap Validation
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })();
+
         // Toggle show/hide password
-        const togglePassword = document.querySelector("#togglePassword");
+        const togglePasswordCheck = document.querySelector("#togglePasswordCheck");
         const passwordInput = document.querySelector("#password");
 
-        togglePassword.addEventListener("click", function() {
-            const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-            passwordInput.setAttribute("type", type);
-
-            this.querySelector("i").classList.toggle("bi-eye");
-            this.querySelector("i").classList.toggle("bi-eye-slash");
+        togglePasswordCheck.addEventListener("change", function() {
+            passwordInput.setAttribute("type", this.checked ? "text" : "password");
         });
     </script>
 </body>
