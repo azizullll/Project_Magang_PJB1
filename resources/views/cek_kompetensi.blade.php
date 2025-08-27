@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cek Kompetensi</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cek Kompetensi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <style>
     body {
@@ -54,14 +55,14 @@
       background-color: #e2e8f0;
     }
     .btn-back {
-      background-color: #1d4ed8;
+      background-color: #0ea5e9;
       color: white;
       font-weight: 500;
       border-radius: 8px;
       padding: 10px 20px;
     }
     .btn-back:hover {
-      background-color: #1e40af;
+      background-color: #0284c7;
     }
     h2 {
       font-weight: 700;
@@ -85,11 +86,13 @@
     }
   </style>
 </head>
+
 <body>
 
-<div class="container py-5">
-  <h2 class="text-center mb-5">Cek Kompetensi Karyawan</h2>
+    <div class="container py-5">
+        <h2 class="text-center mb-5">Cek Kompetensi Karyawan</h2>
 
+  <!-- Form Input -->
   <div class="card mb-5">
     <div class="card-header">
       <i class="bi bi-person-badge"></i> Form Input Karyawan
@@ -133,6 +136,7 @@
     </div>
   </div>
 
+  <!-- Tabel Output -->
   <div class="card">
     <div class="card-header">
       <i class="bi bi-clipboard-data"></i> Hasil Rekomendasi Pelatihan
@@ -173,6 +177,7 @@
               <td>Public Speaking</td>
               <td>Leadership & Communication</td>
             </tr>
+            <!-- Data dari backend -->
           </tbody>
         </table>
       </div>
@@ -180,7 +185,9 @@
   </div>
 </div>
 
+<!-- Bootstrap Icon -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
 </body>
+
 </html>

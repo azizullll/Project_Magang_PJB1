@@ -39,7 +39,7 @@
         }
 
         .btn-login:hover {
-            background: #ffc107;
+            background: #ebe9e2;
             color: #0d47a1;
         }
 
