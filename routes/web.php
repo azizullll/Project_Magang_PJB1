@@ -2,6 +2,7 @@
 
 // routes/web.php
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
 // Landing Page
 Route::get('/', function () {
@@ -11,7 +12,11 @@ Route::get('/', function () {
 // Dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
-});
+})->middleware('auth');
+
+// Auth Routes
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Halaman Data Karyawan
 Route::get('/data-karyawan', function () {

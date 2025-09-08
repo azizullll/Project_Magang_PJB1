@@ -124,7 +124,14 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container d-flex justify-content-between">
             <a class="navbar-brand" href="#">SkillPath</a>
-            <button class="btn btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+            @auth
+                <form action="{{ route('logout') }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-login">Logout</button>
+                </form>
+            @else
+                <button class="btn btn-login" data-bs-toggle="modal" data-bs-target="#loginModal">Login</button>
+            @endauth
         </div>
     </nav>
 
@@ -156,29 +163,34 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form class="needs-validation" novalidate>
+                    <form class="needs-validation" action="{{ route('login') }}" method="POST" novalidate>
+                        @csrf
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label fw-semibold">Email</label>
-                            <input type="email" class="form-control rounded-pill" id="email"
-                                placeholder="Masukkan email" required
+                            <input type="email" name="email" class="form-control rounded-pill @error('email') is-invalid @enderror" id="email"
+                                placeholder="Masukkan email" required value="{{ old('email') }}"
                                 pattern="^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|student\.polije\.ac\.id)$">
-                            <div class="invalid-feedback">
-                                Email harus menggunakan @gmail.com / @yahoo.com / @outlook.com / @student.polije.ac.id
-                            </div>
+                            @error('email')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @else
+                                <div class="invalid-feedback">Email harus menggunakan @gmail.com / @yahoo.com / @outlook.com / @student.polije.ac.id</div>
+                            @enderror
                         </div>
 
                         <!-- Password -->
                         <div class="mb-3">
                             <label for="password" class="form-label fw-semibold">Password</label>
                             <div class="position-relative">
-                                <input type="password" class="form-control rounded-pill pe-5" id="password"
+                                <input type="password" name="password" class="form-control rounded-pill pe-5 @error('password') is-invalid @enderror" id="password"
                                     placeholder="Masukkan password" required minlength="6">
 
                                 <!-- Pesan validasi -->
-                                <div class="invalid-feedback">
-                                    Password minimal 6 karakter
-                                </div>
+                                @error('password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @else
+                                    <div class="invalid-feedback">Password minimal 6 karakter</div>
+                                @enderror
 
                                 <!-- Show Password di bawah kanan -->
                                 <div class="form-check mt-2 d-flex justify-content-end">
@@ -223,6 +235,70 @@
 
         togglePasswordCheck.addEventListener("change", function() {
             passwordInput.setAttribute("type", this.checked ? "text" : "password");
+        });
+
+        // Email domain validation with warning
+        const emailInput = document.querySelector("#email");
+        const emailFeedback = emailInput.nextElementSibling;
+        const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'student.polije.ac.id'];
+        
+        emailInput.addEventListener('input', function() {
+            const email = this.value;
+            const domain = email.split('@')[1];
+            
+            if (email && domain && !allowedDomains.includes(domain)) {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+                emailFeedback.textContent = 'Email harus menggunakan @gmail.com / @yahoo.com / @outlook.com / @student.polije.ac.id';
+                emailFeedback.style.display = 'block';
+            } else if (email && domain && allowedDomains.includes(domain)) {
+                this.classList.add('is-valid');
+                this.classList.remove('is-invalid');
+                emailFeedback.style.display = 'none';
+            } else {
+                this.classList.remove('is-invalid', 'is-valid');
+                emailFeedback.style.display = 'none';
+            }
+        });
+
+        // Prevent modal close on login errors
+        const loginModal = document.querySelector('#loginModal');
+        const loginForm = document.querySelector('form[action="{{ route('login') }}"]');
+        let hasLoginError = false;
+
+        // Check if there are validation errors on page load
+        if (emailInput.classList.contains('is-invalid') || passwordInput.classList.contains('is-invalid')) {
+            hasLoginError = true;
+        }
+
+        // Show modal if there are errors
+        if (hasLoginError) {
+            const modal = new bootstrap.Modal(loginModal);
+            modal.show();
+        }
+
+        // Prevent modal close when there are errors
+        loginModal.addEventListener('hide.bs.modal', function(event) {
+            if (hasLoginError) {
+                event.preventDefault();
+                return false;
+            }
+        });
+
+        // Reset error state on successful form submission
+        loginForm.addEventListener('submit', function() {
+            hasLoginError = false;
+        });
+
+        // Reset error state when modal is manually closed
+        loginModal.addEventListener('hidden.bs.modal', function() {
+            hasLoginError = false;
+            // Clear form and validation states
+            loginForm.reset();
+            loginForm.classList.remove('was-validated');
+            emailInput.classList.remove('is-invalid', 'is-valid');
+            passwordInput.classList.remove('is-invalid', 'is-valid');
+            emailFeedback.style.display = 'none';
         });
     </script>
 </body>
