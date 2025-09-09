@@ -18,27 +18,17 @@ Route::get('/data-karyawan', function () {
     return view('data_karyawan');
 });
 
-// Halaman Input Data
-Route::get('/input', function () {
-    return view('input');
-});
-
-// Halaman Kompetensi
-Route::get('/kompetensi', function () {
-    return view('kompetensi');
-});
-
 // Halaman Pelatihan
 Route::get('/pelatihan', function () {
     return view('pelatihan');
 });
 
-// Halaman Pengaturan
-Route::get('/pengaturan', function () {
-    return view('pengaturan');
+// Halaman Data Sertifikasi
+Route::get('/data-sertifikasi', function () {
+    return view('data_sertifikasi');
 });
 
-// Halaman Cek Kompetensi
-Route::get('/cek-kompetensi', function () {
-    return view('cek_kompetensi');
+// Halaman Rekomendasi
+Route::get('/rekomendasi', function () {
+    return view('rekomendasi');
 });

@@ -7,6 +7,7 @@
     <title>@yield('title', 'SkillPath')</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <style>
         /* Layout Styling untuk Dashboard */
@@ -124,6 +125,140 @@
             margin: 0;
         }
 
+        /* Custom Styles untuk Halaman Data Sertifikasi dan Rekomendasi */
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0 !important;
+            border: none;
+            padding: 20px 25px;
+        }
+
+        .card-header h4 {
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table thead th {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            font-weight: 600;
+            padding: 15px 12px;
+        }
+
+        .table tbody td {
+            padding: 12px;
+            vertical-align: middle;
+            border-color: #e9ecef;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .pagination .page-link {
+            border-radius: 8px;
+            margin: 0 2px;
+            border: 1px solid #e1e5e9;
+            color: #667eea;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: #667eea;
+        }
+
+        /* Summary Cards Styling */
+        .card.bg-primary, .card.bg-success, .card.bg-warning, .card.bg-info {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card.bg-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        }
+
+        .card.bg-success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%) !important;
+        }
+
+        .card.bg-warning {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        }
+
+        .card.bg-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
@@ -137,6 +272,15 @@
 
             .main-content {
                 margin-left: 0;
+            }
+
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 0.75rem;
             }
         }
     </style>
@@ -155,22 +299,10 @@
                     Dashboard
                 </a>
             </li>
-            <li class="{{ request()->is('input') ? 'active' : '' }}">
-                <a href="{{ url('/input') }}">
-                    <i class="fas fa-plus-circle"></i>
-                    Input Data
-                </a>
-            </li>
             <li class="{{ request()->is('data-karyawan') ? 'active' : '' }}">
                 <a href="{{ url('/data-karyawan') }}">
                     <i class="fas fa-users"></i>
                     Data Karyawan
-                </a>
-            </li>
-            <li class="{{ request()->is('kompetensi') ? 'active' : '' }}">
-                <a href="{{ url('/kompetensi') }}">
-                    <i class="fas fa-chart-bar"></i>
-                    Kompetensi
                 </a>
             </li>
             <li class="{{ request()->is('pelatihan') ? 'active' : '' }}">
@@ -179,10 +311,16 @@
                     Pelatihan
                 </a>
             </li>
-            <li class="{{ request()->is('pengaturan') ? 'active' : '' }}">
-                <a href="{{ url('/pengaturan') }}">
-                    <i class="fas fa-cog"></i>
-                    Pengaturan
+            <li class="{{ request()->is('data-sertifikasi') ? 'active' : '' }}">
+                <a href="{{ url('/data-sertifikasi') }}">
+                    <i class="fas fa-certificate"></i>
+                    Data Sertifikasi
+                </a>
+            </li>
+            <li class="{{ request()->is('rekomendasi') ? 'active' : '' }}">
+                <a href="{{ url('/rekomendasi') }}">
+                    <i class="fas fa-lightbulb"></i>
+                    Rekomendasi
                 </a>
             </li>
         </ul>
@@ -199,6 +337,7 @@
         @yield('content')
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Toggle sidebar for mobile
         function toggleSidebar() {
