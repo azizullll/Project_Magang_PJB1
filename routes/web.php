@@ -3,6 +3,7 @@
 // routes/web.php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PelatihanController;
 
 // Landing Page
 Route::get('/', function () {
@@ -36,4 +37,14 @@ Route::get('/data-sertifikasi', function () {
 // Halaman Rekomendasi
 Route::get('/rekomendasi', function () {
     return view('rekomendasi');
+});
+
+// API Routes untuk CRUD Pelatihan
+Route::prefix('api/pelatihan')->group(function () {
+    Route::get('/', [PelatihanController::class, 'index']); // GET /api/pelatihan - List semua pelatihan
+    Route::post('/', [PelatihanController::class, 'store']); // POST /api/pelatihan - Tambah pelatihan baru
+    Route::get('/search', [PelatihanController::class, 'search']); // GET /api/pelatihan/search?q=query - Search pelatihan
+    Route::get('/{id}', [PelatihanController::class, 'show']); // GET /api/pelatihan/{id} - Detail pelatihan
+    Route::put('/{id}', [PelatihanController::class, 'update']); // PUT /api/pelatihan/{id} - Update pelatihan
+    Route::delete('/{id}', [PelatihanController::class, 'destroy']); // DELETE /api/pelatihan/{id} - Hapus pelatihan
 });
