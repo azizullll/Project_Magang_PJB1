@@ -42,3 +42,14 @@ Route::get('/data-sertifikasi', function () {
 Route::get('/rekomendasi', function () {
     return view('rekomendasi');
 });
+
+// API Routes untuk CRUD Pelatihan (aktifkan jika PelatihanController sudah dibuat)
+// use App\Http\Controllers\PelatihanController;
+// Route::prefix('api/pelatihan')->group(function () {
+//     Route::get('/', [PelatihanController::class, 'index']);
+//     Route::post('/', [PelatihanController::class, 'store']);
+//     Route::get('/search', [PelatihanController::class, 'search']);
+//     Route::get('/{id}', [PelatihanController::class, 'show']);
+//     Route::put('/{id}', [PelatihanController::class, 'update']);
+//     Route::delete('/{id}', [PelatihanController::class, 'destroy']);
+// });

@@ -65,7 +65,11 @@ class PelatihanSeeder extends Seeder
         ];
 
         foreach ($pelatihanData as $data) {
-            Pelatihan::create($data);
+            // Idempotent seeding based on unique 'kode'
+            Pelatihan::updateOrCreate(
+                ['kode' => $data['kode']],
+                $data
+            );
         }
     }
 }
