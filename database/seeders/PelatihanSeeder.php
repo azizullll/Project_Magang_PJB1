@@ -23,7 +23,8 @@ class PelatihanSeeder extends Seeder
                 'level' => 1,
                 'biaya' => 'Rp 1.500.000',
                 'durasi' => '2 hari',
-                'sertifikat' => 'K3-CERT-001'
+                'sertifikat' => 'K3-CERT-001',
+                'tenggat_sertifikat' => 3
             ],
             [
                 'kode' => 'PLTU-001',
@@ -34,7 +35,8 @@ class PelatihanSeeder extends Seeder
                 'level' => 1,
                 'biaya' => 'Rp 2.000.000',
                 'durasi' => '3 hari',
-                'sertifikat' => 'PLTU-CERT-001'
+                'sertifikat' => 'PLTU-CERT-001',
+                'tenggat_sertifikat' => 2
             ],
             [
                 'kode' => 'PLTU-002',
@@ -45,7 +47,8 @@ class PelatihanSeeder extends Seeder
                 'level' => 2,
                 'biaya' => 'Rp 2.500.000',
                 'durasi' => '4 hari',
-                'sertifikat' => 'PLTU-CERT-002'
+                'sertifikat' => 'PLTU-CERT-002',
+                'tenggat_sertifikat' => 2
             ],
             [
                 'kode' => 'MAINT-001',
@@ -56,7 +59,8 @@ class PelatihanSeeder extends Seeder
                 'level' => 2,
                 'biaya' => 'Rp 1.800.000',
                 'durasi' => '2 hari',
-                'sertifikat' => 'MAINT-CERT-001'
+                'sertifikat' => 'MAINT-CERT-001',
+                'tenggat_sertifikat' => 1
             ],
             [
                 'kode' => 'ENG-001',
@@ -67,7 +71,8 @@ class PelatihanSeeder extends Seeder
                 'level' => 3,
                 'biaya' => 'Rp 3.000.000',
                 'durasi' => '5 hari',
-                'sertifikat' => 'ENG-CERT-001'
+                'sertifikat' => 'ENG-CERT-001',
+                'tenggat_sertifikat' => 5
             ]
         ];
 

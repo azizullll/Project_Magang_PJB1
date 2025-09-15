@@ -32,6 +32,7 @@ class PelatihanController extends Controller
             'biaya' => 'required|string|max:255',
             'durasi' => 'required|string|max:255',
             'sertifikat' => 'required|string|max:255',
+            'tenggat_sertifikat' => 'required|integer|min:1|max:5',
         ]);
 
         if ($validator->fails()) {
@@ -102,6 +103,7 @@ class PelatihanController extends Controller
             'biaya' => 'required|string|max:255',
             'durasi' => 'required|string|max:255',
             'sertifikat' => 'required|string|max:255',
+            'tenggat_sertifikat' => 'required|integer|min:1|max:5',
         ]);
 
         if ($validator->fails()) {
@@ -173,6 +175,7 @@ class PelatihanController extends Controller
                 ->orWhere('jabatan', 'like', '%' . $query . '%')
                 ->orWhere('level', $query) // Exact match for level
                 ->orWhere('level', 'like', '%' . $query . '%') // Partial match for level text
+                ->orWhere('tenggat_sertifikat', $query) // Exact match for tenggat_sertifikat
                 ->get();
         }
 

@@ -20,10 +20,12 @@ class Pelatihan extends Model
         'level',
         'biaya',
         'durasi',
-        'sertifikat'
+        'sertifikat',
+        'tenggat_sertifikat'
     ];
 
     protected $casts = [
         'level' => 'integer',
+        'tenggat_sertifikat' => 'integer',
     ];
 }

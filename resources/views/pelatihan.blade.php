@@ -3,6 +3,8 @@
 @section('title', 'Pelatihan')
 
 @section('content')
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         /* Pelatihan Page Styling - Same theme as Dashboard */
         .pelatihan-container {
@@ -228,12 +230,17 @@
             background: #1e40af;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
         }
 
         .edit-button:hover {
@@ -245,17 +252,77 @@
             background: #dc2626;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
         }
 
         .delete-button:hover {
             background: #b91c1c;
             transform: translateY(-1px);
+        }
+
+        .show-button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 36px;
+            height: 36px;
+        }
+
+        .show-button:hover {
+            background: #047857;
+            transform: translateY(-1px);
+        }
+
+        /* Tooltip styling */
+        .action-buttons button[title] {
+            position: relative;
+        }
+
+        .action-buttons button[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .action-buttons button[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 4px solid transparent;
+            border-bottom-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            pointer-events: none;
         }
 
         /* Modal Styling */
@@ -528,6 +595,51 @@
                 flex: 1;
                 padding: 12px !important;
             }
+
+            /* Show modal responsive */
+            .detail-container {
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+            }
+
+            .detail-section {
+                margin-top: 15px !important;
+            }
+
+            .detail-section h4 {
+                font-size: 14px !important;
+                margin-bottom: 10px !important;
+            }
+
+            .detail-item {
+                margin-bottom: 10px !important;
+            }
+
+            .detail-item label {
+                font-size: 12px !important;
+            }
+
+            .detail-item span {
+                font-size: 13px !important;
+            }
+
+            /* Action buttons responsive */
+            .action-buttons {
+                flex-direction: column !important;
+                gap: 4px !important;
+            }
+
+            .action-buttons button {
+                min-width: 32px !important;
+                height: 32px !important;
+                font-size: 12px !important;
+            }
+
+            .action-buttons button[title]:hover::after {
+                bottom: -30px !important;
+                font-size: 10px !important;
+                padding: 3px 6px !important;
+            }
         }
     </style>
 
@@ -546,7 +658,7 @@
             <!-- Search Section -->
             <div style="margin-bottom: 20px;">
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama, kategori, divisi, jabatan, level"
+                    <input type="text" id="searchInput" placeholder="Cari berdasarkan nama, kategori, divisi, jabatan, level, masa aktif"
                         style="
                     padding: 10px 15px;
                     border: 2px solid #e5e7eb;
@@ -659,6 +771,84 @@
             </div>
         </div>
 
+        <!-- Modal Show Detail Pelatihan -->
+        <div id="showPelatihanModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">Detail Pelatihan</h3>
+                    <button class="close-button" onclick="closeShowModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="detail-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="detail-section">
+                            <h4 style="color: #1e40af; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                                <i class="fas fa-info-circle" style="margin-right: 8px;"></i>Informasi Dasar
+                            </h4>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Kode Pelatihan:</label>
+                                <span id="showKode" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Nama Pelatihan:</label>
+                                <span id="showNama" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Kategori:</label>
+                                <span id="showKategori" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Level:</label>
+                                <span id="showLevel" style="color: #1f2937;"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="detail-section">
+                            <h4 style="color: #1e40af; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                                <i class="fas fa-building" style="margin-right: 8px;"></i>Organisasi & Biaya
+                            </h4>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Divisi:</label>
+                                <span id="showDivisi" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Jabatan:</label>
+                                <span id="showJabatan" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Biaya:</label>
+                                <span id="showBiaya" style="color: #1f2937;"></span>
+                            </div>
+                            <div class="detail-item" style="margin-bottom: 12px;">
+                                <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Durasi:</label>
+                                <span id="showDurasi" style="color: #1f2937;"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-section" style="margin-top: 20px;">
+                        <h4 style="color: #1e40af; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                            <i class="fas fa-certificate" style="margin-right: 8px;"></i>Informasi Sertifikat
+                        </h4>
+                        <div class="detail-item" style="margin-bottom: 12px;">
+                            <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Kode Sertifikat:</label>
+                            <span id="showSertifikat" style="color: #1f2937;"></span>
+                        </div>
+                        <div class="detail-item" style="margin-bottom: 12px;">
+                            <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Masa Aktif Sertifikat:</label>
+                            <span id="showTenggat" style="color: #1f2937;"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Status Sertifikat:</label>
+                            <span id="showStatusSertifikat" style="color: #1f2937;"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeShowModal()">Tutup</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal Tambah Pelatihan -->
         <div id="pelatihanModal" class="modal">
             <div class="modal-content">
@@ -749,6 +939,17 @@
                                 <input type="text" id="sertifikat" name="sertifikat"
                                     placeholder="Contoh: K3-CERT-001" required>
                             </div>
+                            <div class="form-group">
+                                <label for="tenggat_sertifikat">Masa Aktif Sertifikat (Tahun)</label>
+                                <select id="tenggat_sertifikat" name="tenggat_sertifikat" required>
+                                    <option value="">Pilih Masa Aktif</option>
+                                    <option value="1">1 Tahun</option>
+                                    <option value="2">2 Tahun</option>
+                                    <option value="3">3 Tahun</option>
+                                    <option value="4">4 Tahun</option>
+                                    <option value="5">5 Tahun</option>
+                                </select>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -759,6 +960,9 @@
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.32/dist/sweetalert2.all.min.js"></script>
 
     <script>
         let isEditMode = false;
@@ -785,7 +989,12 @@
                 renderTable(data || []);
             } catch (error) {
                 console.error('Error loading pelatihan data:', error);
-                alert('Gagal memuat data pelatihan');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal memuat data pelatihan',
+                    confirmButtonColor: '#dc2626'
+                });
             }
         }
 
@@ -839,8 +1048,15 @@
                     <td>${pelatihan.sertifikat || ''}</td>
                     <td>
                         <div class="action-buttons">
-                            <button class="edit-button" onclick="openEditModal(this)">Edit</button>
-                            <button class="delete-button" onclick="deleteRow(this)">Hapus</button>
+                            <button class="show-button" onclick="showPelatihanDetail(this)" title="Lihat Detail">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="edit-button" onclick="openEditModal(this)" title="Edit Data">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-button" onclick="deleteRow(this)" title="Hapus Data">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </td>
                 `;
@@ -871,20 +1087,27 @@
             // Cari data pelatihan berdasarkan ID
             const pelatihan = pelatihanData.find(p => p.id == pelatihanId);
             if (!pelatihan) {
-                alert('Data pelatihan tidak ditemukan');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Data pelatihan tidak ditemukan',
+                    confirmButtonColor: '#dc2626'
+                });
                 return;
             }
 
+
             // Isi form dengan data
-            document.getElementById('kode').value = pelatihan.kode;
-            document.getElementById('nama_pelatihan').value = pelatihan.nama_pelatihan;
-            document.getElementById('kategori').value = pelatihan.kategori;
-            document.getElementById('level').value = pelatihan.level.toString();
-            document.getElementById('biaya').value = pelatihan.biaya;
-            document.getElementById('durasi').value = pelatihan.durasi;
-            document.getElementById('divisi').value = pelatihan.divisi;
-            document.getElementById('jabatan').value = pelatihan.jabatan;
-            document.getElementById('sertifikat').value = pelatihan.sertifikat;
+            document.getElementById('kode').value = pelatihan.kode || '';
+            document.getElementById('nama_pelatihan').value = pelatihan.nama_pelatihan || '';
+            document.getElementById('kategori').value = pelatihan.kategori || '';
+            document.getElementById('level').value = pelatihan.level ? pelatihan.level.toString() : '';
+            document.getElementById('biaya').value = pelatihan.biaya || '';
+            document.getElementById('durasi').value = pelatihan.durasi || '';
+            document.getElementById('divisi').value = pelatihan.divisi || '';
+            document.getElementById('jabatan').value = pelatihan.jabatan || '';
+            document.getElementById('sertifikat').value = pelatihan.sertifikat || '';
+            document.getElementById('tenggat_sertifikat').value = pelatihan.tenggat_sertifikat || '';
 
             // Update modal title dan button
             document.getElementById('modalTitle').textContent = 'Edit Data Pelatihan';
@@ -901,6 +1124,77 @@
             document.getElementById('pelatihanForm').reset();
             isEditMode = false;
             currentEditRow = null;
+        }
+
+        // Fungsi untuk menampilkan detail pelatihan
+        function showPelatihanDetail(button) {
+            const row = button.closest('tr');
+            const pelatihanId = row.getAttribute('data-id');
+
+            // Cari data pelatihan berdasarkan ID
+            const pelatihan = pelatihanData.find(p => p.id == pelatihanId);
+            if (!pelatihan) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Data pelatihan tidak ditemukan',
+                    confirmButtonColor: '#dc2626'
+                });
+                return;
+            }
+
+            // Isi data ke modal show
+            document.getElementById('showKode').textContent = pelatihan.kode || '-';
+            document.getElementById('showNama').textContent = pelatihan.nama_pelatihan || '-';
+            document.getElementById('showKategori').textContent = pelatihan.kategori || '-';
+            document.getElementById('showLevel').innerHTML = `<span class="level-pill level-${pelatihan.level || 1}">LEVEL ${pelatihan.level || 1}</span>`;
+            document.getElementById('showDivisi').textContent = pelatihan.divisi || '-';
+            document.getElementById('showJabatan').textContent = pelatihan.jabatan || '-';
+            document.getElementById('showBiaya').textContent = pelatihan.biaya || '-';
+            document.getElementById('showDurasi').textContent = pelatihan.durasi || '-';
+            document.getElementById('showSertifikat').textContent = pelatihan.sertifikat || '-';
+            
+            // Tampilkan masa aktif sertifikat
+            const tenggatSertifikat = pelatihan.tenggat_sertifikat;
+            if (tenggatSertifikat) {
+                document.getElementById('showTenggat').textContent = `${tenggatSertifikat} Tahun`;
+                
+                // Status sertifikat berdasarkan masa aktif
+                let statusText = '';
+                let statusColor = '';
+                
+                const masaAktif = parseInt(tenggatSertifikat);
+                
+                if (masaAktif >= 3) {
+                    statusText = 'Masa Aktif Panjang';
+                    statusColor = '#059669';
+                } else if (masaAktif === 2) {
+                    statusText = 'Masa Aktif Sedang';
+                    statusColor = '#d97706';
+                } else if (masaAktif === 1) {
+                    statusText = 'Masa Aktif Pendek';
+                    statusColor = '#ea580c';
+                } else {
+                    statusText = 'Masa Aktif Tidak Valid';
+                    statusColor = '#dc2626';
+                }
+                
+                document.getElementById('showStatusSertifikat').innerHTML = 
+                    `<span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>`;
+            } else {
+                document.getElementById('showTenggat').textContent = '-';
+                document.getElementById('showStatusSertifikat').textContent = '-';
+            }
+
+            // Tampilkan modal
+            document.getElementById('showPelatihanModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Fungsi untuk menutup modal show
+        function closeShowModal() {
+            document.getElementById('showPelatihanModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
         }
 
         // Fungsi untuk menyimpan data pelatihan
@@ -924,8 +1218,10 @@
                 durasi: formData.get('durasi'),
                 divisi: formData.get('divisi'),
                 jabatan: formData.get('jabatan'),
-                sertifikat: formData.get('sertifikat')
+                sertifikat: formData.get('sertifikat'),
+                tenggat_sertifikat: parseInt(formData.get('tenggat_sertifikat'))
             };
+
 
             try {
                 let response;
@@ -949,28 +1245,64 @@
 
                 const result = await response.json();
 
+
                 if (result.success) {
                     // Reload data dari server
                     await loadPelatihanData();
                     
-                    alert(result.message);
+                    if (isEditMode) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Data pelatihan berhasil diperbarui!',
+                            confirmButtonColor: '#28a745'
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: 'Data pelatihan berhasil ditambahkan!',
+                            confirmButtonColor: '#28a745'
+                        });
+                    }
                     closeModal();
                 } else {
-                    alert('Error: ' + result.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: result.message,
+                        confirmButtonColor: '#dc2626'
+                    });
                     if (result.errors) {
                         console.error('Validation errors:', result.errors);
                     }
                 }
             } catch (error) {
                 console.error('Error saving pelatihan:', error);
-                alert('Gagal menyimpan data pelatihan');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal menyimpan data pelatihan',
+                    confirmButtonColor: '#dc2626'
+                });
             }
         }
 
 
         // Fungsi untuk menghapus row
         async function deleteRow(button) {
-            if (confirm('Apakah Anda yakin ingin menghapus data pelatihan ini?')) {
+            const result = await Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Data pelatihan akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            });
+
+            if (result.isConfirmed) {
                 const row = button.closest('tr');
                 const pelatihanId = row.getAttribute('data-id');
 
@@ -988,13 +1320,28 @@
                     if (result.success) {
                         // Reload data dari server
                         await loadPelatihanData();
-                        alert(result.message);
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Berhasil!',
+                            text: result.message,
+                            confirmButtonColor: '#28a745'
+                        });
                     } else {
-                        alert('Error: ' + result.message);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error!',
+                            text: result.message,
+                            confirmButtonColor: '#dc2626'
+                        });
                     }
                 } catch (error) {
                     console.error('Error deleting pelatihan:', error);
-                    alert('Gagal menghapus data pelatihan');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Gagal menghapus data pelatihan',
+                        confirmButtonColor: '#dc2626'
+                    });
                 }
             }
         }
@@ -1002,8 +1349,12 @@
         // Menutup modal ketika user klik di luar modal
         window.onclick = function(event) {
             const modal = document.getElementById('pelatihanModal');
+            const showModal = document.getElementById('showPelatihanModal');
             if (event.target == modal) {
                 closeModal();
+            }
+            if (event.target == showModal) {
+                closeShowModal();
             }
         }
 
@@ -1011,6 +1362,7 @@
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
+                closeShowModal();
             }
         });
 
@@ -1060,11 +1412,21 @@
                 } else {
                     const errorMessage = result && result.message ? result.message : 'Unknown error occurred';
                     console.error('API Error:', result);
-                    alert('Error: ' + errorMessage);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: errorMessage,
+                        confirmButtonColor: '#dc2626'
+                    });
                 }
             } catch (error) {
                 console.error('Error searching pelatihan:', error);
-                alert('Gagal melakukan pencarian: ' + error.message);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal melakukan pencarian: ' + error.message,
+                    confirmButtonColor: '#dc2626'
+                });
             }
         }
 
@@ -1086,7 +1448,12 @@
                 loadPelatihanData();
             } catch (error) {
                 console.error('Error in clearSearch:', error);
-                alert('Gagal membersihkan pencarian');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Gagal membersihkan pencarian',
+                    confirmButtonColor: '#dc2626'
+                });
             }
         }
     </script>
