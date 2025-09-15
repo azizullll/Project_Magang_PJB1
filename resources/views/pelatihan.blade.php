@@ -714,14 +714,12 @@
                     <thead>
                         <tr>
                             <th>Kode</th>
-                            <th>Nama Pelatihan</th>
-                            <th>Kategori</th>
-                            <th>Divisi</th>
-                            <th>Jabatan</th>
+                            <th>Judul</th>
+                            <th>Bidang</th>
+                            <th>Kompetensi Inti</th>
+                            <th>Kompetensi Pilihan</th>
                             <th>Level</th>
-                            <th>Biaya</th>
-                            <th>Durasi Kepelatihan</th>
-                            <th>Sertifikat</th>
+                            <th>Masa Aktif Sertifikat</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -861,52 +859,29 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="kode">Kode Pelatihan</label>
-                                <input type="text" id="kode" name="kode" placeholder="Contoh: K3-001" required>
+                                <input type="text" id="kode" name="kode" placeholder="Contoh: CM001" required>
                             </div>
                             <div class="form-group">
-                                <label for="kategori">Kategori</label>
-                                <select id="kategori" name="kategori" required>
-                                    <option value="">Pilih Kategori</option>
-                                    <option value="Keselamatan">Keselamatan</option>
-                                    <option value="Operasi">Operasi</option>
-                                    <option value="Pemeliharaan">Pemeliharaan</option>
-                                    <option value="Teknik">Teknik</option>
-                                </select>
+                                <label for="bidang">Bidang</label>
+                                <input type="text" id="bidang" name="bidang" placeholder="Contoh: Proyek" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="nama_pelatihan">Nama Pelatihan</label>
-                                <input type="text" id="nama_pelatihan" name="nama_pelatihan"
-                                    placeholder="Masukkan nama pelatihan" required>
+                                <label for="judul">Judul</label>
+                                <input type="text" id="judul" name="judul" placeholder="Masukkan judul pelatihan" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="divisi">Divisi</label>
-                                <select id="divisi" name="divisi" required>
-                                    <option value="">Pilih Divisi</option>
-                                    <option value="Umum">Umum</option>
-                                    <option value="Operasi">Operasi</option>
-                                    <option value="Pemeliharaan">Pemeliharaan</option>
-                                    <option value="Teknik">Teknik</option>
-                                    <option value="Administrasi">Administrasi</option>
-                                    <option value="Keuangan">Keuangan</option>
-                                </select>
+                                <label for="kompetensi_inti">Kompetensi Inti</label>
+                                <input type="text" id="kompetensi_inti" name="kompetensi_inti" placeholder="Kompetensi inti" required>
                             </div>
                             <div class="form-group">
-                                <label for="jabatan">Jabatan</label>
-                                <select id="jabatan" name="jabatan" required>
-                                    <option value="">Pilih Jabatan</option>
-                                    <option value="Umum">Umum</option>
-                                    <option value="Operator">Operator</option>
-                                    <option value="Teknisi">Teknisi</option>
-                                    <option value="Engineer">Engineer</option>
-                                    <option value="Supervisor">Supervisor</option>
-                                    <option value="Manager">Manager</option>
-                                </select>
+                                <label for="kompetensi_pilihan">Kompetensi Pilihan</label>
+                                <input type="text" id="kompetensi_pilihan" name="kompetensi_pilihan" placeholder="Kompetensi pilihan (opsional)">
                             </div>
                         </div>
 
@@ -918,30 +893,19 @@
                                     <option value="1">Level 1</option>
                                     <option value="2">Level 2</option>
                                     <option value="3">Level 3</option>
+                                    <option value="4">Level 4</option>
+                                    <option value="5">Level 5</option>
+                                    <option value="6">Level 6</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="biaya">Biaya</label>
-                                <input type="text" id="biaya" name="biaya" placeholder="Contoh: Rp 1.500.000" required>
-                            </div>
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="durasi">Durasi Kepelatiahn</label>
-                                <input type="text" id="durasi" name="durasi" placeholder="Contoh: 3 hari" required>
-                            </div>
-                        </div>
+                        <!-- Tidak ada durasi/biaya/sertifikat pada skema baru -->
 
                         <div class="form-row">
-                            <div class="form-group">
-                                <label for="sertifikat">Kode Sertifikat</label>
-                                <input type="text" id="sertifikat" name="sertifikat"
-                                    placeholder="Contoh: K3-CERT-001" required>
-                            </div>
                             <div class="form-group">
                                 <label for="tenggat_sertifikat">Masa Aktif Sertifikat (Tahun)</label>
-                                <select id="tenggat_sertifikat" name="tenggat_sertifikat" required>
+                                <select id="tenggat_sertifikat" name="tenggat_sertifikat">
                                     <option value="">Pilih Masa Aktif</option>
                                     <option value="1">1 Tahun</option>
                                     <option value="2">2 Tahun</option>
@@ -1038,14 +1002,12 @@
                 
                 row.innerHTML = `
                     <td>${pelatihan.kode || ''}</td>
-                    <td>${pelatihan.nama_pelatihan || ''}</td>
-                    <td>${pelatihan.kategori || ''}</td>
-                    <td>${pelatihan.divisi || ''}</td>
-                    <td>${pelatihan.jabatan || ''}</td>
+                    <td>${pelatihan.judul || ''}</td>
+                    <td>${pelatihan.bidang || ''}</td>
+                    <td>${pelatihan.kompetensi_inti || ''}</td>
+                    <td>${pelatihan.kompetensi_pilihan || ''}</td>
                     <td><span class="level-pill level-${pelatihan.level || 1}">LEVEL ${pelatihan.level || 1}</span></td>
-                    <td>${pelatihan.biaya || ''}</td>
-                    <td class="text-center">${pelatihan.durasi || ''}</td>
-                    <td>${pelatihan.sertifikat || ''}</td>
+                    <td>${pelatihan.tenggat_sertifikat ? pelatihan.tenggat_sertifikat + ' Tahun' : ''}</td>
                     <td>
                         <div class="action-buttons">
                             <button class="show-button" onclick="showPelatihanDetail(this)" title="Lihat Detail">
@@ -1099,14 +1061,11 @@
 
             // Isi form dengan data
             document.getElementById('kode').value = pelatihan.kode || '';
-            document.getElementById('nama_pelatihan').value = pelatihan.nama_pelatihan || '';
-            document.getElementById('kategori').value = pelatihan.kategori || '';
+            document.getElementById('judul').value = pelatihan.judul || '';
+            document.getElementById('bidang').value = pelatihan.bidang || '';
+            document.getElementById('kompetensi_inti').value = pelatihan.kompetensi_inti || '';
+            document.getElementById('kompetensi_pilihan').value = pelatihan.kompetensi_pilihan || '';
             document.getElementById('level').value = pelatihan.level ? pelatihan.level.toString() : '';
-            document.getElementById('biaya').value = pelatihan.biaya || '';
-            document.getElementById('durasi').value = pelatihan.durasi || '';
-            document.getElementById('divisi').value = pelatihan.divisi || '';
-            document.getElementById('jabatan').value = pelatihan.jabatan || '';
-            document.getElementById('sertifikat').value = pelatihan.sertifikat || '';
             document.getElementById('tenggat_sertifikat').value = pelatihan.tenggat_sertifikat || '';
 
             // Update modal title dan button
@@ -1145,14 +1104,14 @@
 
             // Isi data ke modal show
             document.getElementById('showKode').textContent = pelatihan.kode || '-';
-            document.getElementById('showNama').textContent = pelatihan.nama_pelatihan || '-';
-            document.getElementById('showKategori').textContent = pelatihan.kategori || '-';
+            document.getElementById('showNama').textContent = pelatihan.judul || '-';
+            document.getElementById('showKategori').textContent = pelatihan.bidang || '-';
             document.getElementById('showLevel').innerHTML = `<span class="level-pill level-${pelatihan.level || 1}">LEVEL ${pelatihan.level || 1}</span>`;
-            document.getElementById('showDivisi').textContent = pelatihan.divisi || '-';
-            document.getElementById('showJabatan').textContent = pelatihan.jabatan || '-';
-            document.getElementById('showBiaya').textContent = pelatihan.biaya || '-';
-            document.getElementById('showDurasi').textContent = pelatihan.durasi || '-';
-            document.getElementById('showSertifikat').textContent = pelatihan.sertifikat || '-';
+            document.getElementById('showDivisi').textContent = pelatihan.kompetensi_inti || '-';
+            document.getElementById('showJabatan').textContent = pelatihan.kompetensi_pilihan || '-';
+            document.getElementById('showBiaya').textContent = '-';
+            document.getElementById('showDurasi').textContent = '-';
+            document.getElementById('showSertifikat').textContent = '-';
             
             // Tampilkan masa aktif sertifikat
             const tenggatSertifikat = pelatihan.tenggat_sertifikat;
@@ -1210,16 +1169,13 @@
 
             // Ambil data dari form
             const data = {
+                bidang: formData.get('bidang'),
                 kode: formData.get('kode'),
-                nama_pelatihan: formData.get('nama_pelatihan'),
-                kategori: formData.get('kategori'),
+                judul: formData.get('judul'),
+                kompetensi_inti: formData.get('kompetensi_inti'),
+                kompetensi_pilihan: formData.get('kompetensi_pilihan'),
                 level: parseInt(formData.get('level')),
-                biaya: formData.get('biaya'),
-                durasi: formData.get('durasi'),
-                divisi: formData.get('divisi'),
-                jabatan: formData.get('jabatan'),
-                sertifikat: formData.get('sertifikat'),
-                tenggat_sertifikat: parseInt(formData.get('tenggat_sertifikat'))
+                tenggat_sertifikat: formData.get('tenggat_sertifikat') ? parseInt(formData.get('tenggat_sertifikat')) : null
             };
 
 

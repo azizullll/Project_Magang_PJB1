@@ -19,5 +19,6 @@ class Pelatihan extends Model
         'kompetensi_inti',
         'kompetensi_pilihan',
         'level',
+        'tenggat_sertifikat',
     ];
 }

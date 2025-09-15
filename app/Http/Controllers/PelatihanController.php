@@ -14,7 +14,11 @@ class PelatihanController extends Controller
     public function index()
     {
         $pelatihan = Pelatihan::all();
-        return response()->json($pelatihan);
+        return response()->json([
+            'success' => true,
+            'data' => $pelatihan,
+            'total' => $pelatihan->count(),
+        ]);
     }
 
     /**
@@ -23,16 +27,13 @@ class PelatihanController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            'bidang' => 'required|string|max:255',
             'kode' => 'required|string|max:255|unique:pelatihan,kode',
-            'nama_pelatihan' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
-            'divisi' => 'required|string|max:255',
-            'jabatan' => 'required|string|max:255',
-            'level' => 'required|integer|min:1|max:3',
-            'biaya' => 'required|string|max:255',
-            'durasi' => 'required|string|max:255',
-            'sertifikat' => 'required|string|max:255',
-            'tenggat_sertifikat' => 'required|integer|min:1|max:5',
+            'judul' => 'required|string|max:255',
+            'kompetensi_inti' => 'required|string',
+            'kompetensi_pilihan' => 'nullable|string',
+            'level' => 'required|integer|min:1',
+            'tenggat_sertifikat' => 'nullable|integer|min:1|max:5',
         ]);
 
         if ($validator->fails()) {
@@ -44,7 +45,9 @@ class PelatihanController extends Controller
         }
 
         try {
-            $pelatihan = Pelatihan::create($request->all());
+            $pelatihan = Pelatihan::create($request->only([
+                'bidang', 'kode', 'judul', 'kompetensi_inti', 'kompetensi_pilihan', 'level', 'tenggat_sertifikat'
+            ]));
             return response()->json([
                 'success' => true,
                 'message' => 'Data pelatihan berhasil ditambahkan',
@@ -94,16 +97,13 @@ class PelatihanController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
+            'bidang' => 'required|string|max:255',
             'kode' => 'required|string|max:255|unique:pelatihan,kode,' . $id,
-            'nama_pelatihan' => 'required|string|max:255',
-            'kategori' => 'required|string|max:255',
-            'divisi' => 'required|string|max:255',
-            'jabatan' => 'required|string|max:255',
-            'level' => 'required|integer|min:1|max:3',
-            'biaya' => 'required|string|max:255',
-            'durasi' => 'required|string|max:255',
-            'sertifikat' => 'required|string|max:255',
-            'tenggat_sertifikat' => 'required|integer|min:1|max:5',
+            'judul' => 'required|string|max:255',
+            'kompetensi_inti' => 'required|string',
+            'kompetensi_pilihan' => 'nullable|string',
+            'level' => 'required|integer|min:1',
+            'tenggat_sertifikat' => 'nullable|integer|min:1|max:5',
         ]);
 
         if ($validator->fails()) {
@@ -115,7 +115,9 @@ class PelatihanController extends Controller
         }
 
         try {
-            $pelatihan->update($request->all());
+            $pelatihan->update($request->only([
+                'bidang', 'kode', 'judul', 'kompetensi_inti', 'kompetensi_pilihan', 'level', 'tenggat_sertifikat'
+            ]));
             return response()->json([
                 'success' => true,
                 'message' => 'Data pelatihan berhasil diupdate',
@@ -169,13 +171,11 @@ class PelatihanController extends Controller
         if (empty($query)) {
             $pelatihan = Pelatihan::all();
         } else {
-            $pelatihan = Pelatihan::where('nama_pelatihan', 'like', '%' . $query . '%')
-                ->orWhere('kategori', 'like', '%' . $query . '%')
-                ->orWhere('divisi', 'like', '%' . $query . '%')
-                ->orWhere('jabatan', 'like', '%' . $query . '%')
-                ->orWhere('level', $query) // Exact match for level
-                ->orWhere('level', 'like', '%' . $query . '%') // Partial match for level text
-                ->orWhere('tenggat_sertifikat', $query) // Exact match for tenggat_sertifikat
+            $pelatihan = Pelatihan::where('judul', 'like', '%' . $query . '%')
+                ->orWhere('bidang', 'like', '%' . $query . '%')
+                ->orWhere('kompetensi_inti', 'like', '%' . $query . '%')
+                ->orWhere('kompetensi_pilihan', 'like', '%' . $query . '%')
+                ->orWhere('level', $query)
                 ->get();
         }
 
