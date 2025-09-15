@@ -948,9 +948,10 @@
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
-                const data = await response.json();
-                pelatihanData = data || [];
-                renderTable(data || []);
+                const result = await response.json();
+                const items = Array.isArray(result) ? result : (result && result.data ? result.data : []);
+                pelatihanData = items;
+                renderTable(items);
             } catch (error) {
                 console.error('Error loading pelatihan data:', error);
                 Swal.fire({
@@ -1348,9 +1349,10 @@
                 
                 const result = await response.json();
 
-                if (result && result.success) {
-                    pelatihanData = result.data || [];
-                    renderTable(result.data || []);
+                if ((Array.isArray(result)) || (result && result.success)) {
+                    const items = Array.isArray(result) ? result : (result.data || []);
+                    pelatihanData = items;
+                    renderTable(items);
                     
                     // Update search results info
                     if (searchTerm === '') {
