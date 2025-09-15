@@ -3,6 +3,7 @@
 // routes/web.php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EmployeeController;
 
 // Landing Page
 Route::get('/', function () {
@@ -18,10 +19,14 @@ Route::get('/dashboard', function () {
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Halaman Data Karyawan
-Route::get('/data-karyawan', function () {
-    return view('data_karyawan');
-});
+// Data Karyawan CRUD
+Route::resource('data-karyawan', EmployeeController::class)->parameters([
+    'data-karyawan' => 'employee'
+])->names('employees');
+
+// Hapus sertifikat individual
+Route::delete('/employees/{employee}/certificates/{certification}', [EmployeeController::class, 'destroyCertificate'])
+    ->name('employees.certificates.destroy');
 
 // Halaman Pelatihan
 Route::get('/pelatihan', function () {

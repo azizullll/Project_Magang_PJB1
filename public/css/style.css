@@ -237,3 +237,67 @@ a {
 
 .btn-edit:hover { background-color: #2980b9; }
 .btn-delete:hover { background-color: #c0392b; }
+
+/* Form styles */
+form input,
+form select,
+form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fff;
+}
+
+form label {
+  display: block;
+  margin-bottom: 6px;
+  color: #374151;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #1e40af;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.main-content-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  padding: 20px;
+}
+
+.content-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.employee-table thead th {
+  background: transparent;
+}
+
+.employee-table tbody tr:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.error {
+  margin-top: 4px;
+  color: #b91c1c;
+  font-size: 12px;
+}

@@ -133,7 +133,7 @@
         }
 
         .card-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             color: white;
             border-radius: 12px 12px 0 0 !important;
             border: none;
@@ -199,8 +199,8 @@
         }
 
         .form-control:focus, .form-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
         }
 
         .modal-content {
@@ -210,7 +210,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
             color: white;
             border-radius: 12px 12px 0 0;
             border: none;
@@ -228,12 +228,12 @@
             border-radius: 8px;
             margin: 0 2px;
             border: 1px solid #e1e5e9;
-            color: #667eea;
+            color: #3b82f6;
         }
 
         .pagination .page-item.active .page-link {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #667eea;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-color: #3b82f6;
         }
 
         /* Summary Cards Styling */
@@ -244,7 +244,7 @@
         }
 
         .card.bg-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%) !important;
         }
 
         .card.bg-success {
