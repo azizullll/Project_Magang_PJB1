@@ -640,6 +640,16 @@
                 font-size: 10px !important;
                 padding: 3px 6px !important;
             }
+
+            /* Competency section responsive */
+            .detail-section textarea {
+                font-size: 12px !important;
+                padding: 8px !important;
+            }
+
+            .detail-section label {
+                font-size: 12px !important;
+            }
         }
     </style>
 
@@ -842,6 +852,20 @@
                             <span id="showStatusSertifikat" style="color: #1f2937;"></span>
                         </div>
                     </div>
+                    
+                    <div class="detail-section" style="margin-top: 20px;">
+                        <h4 style="color: #1e40af; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                            <i class="fas fa-tasks" style="margin-right: 8px;"></i>Kompetensi
+                        </h4>
+                        <div class="detail-item" style="margin-bottom: 12px;">
+                            <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Kompetensi Inti:</label>
+                            <div id="showKompetensiInti" style="color: #1f2937; background: #f8f9fa; padding: 10px; border-radius: 8px; border-left: 4px solid #1e40af; white-space: pre-line;"></div>
+                        </div>
+                        <div class="detail-item">
+                            <label style="font-weight: 600; color: #374151; display: block; margin-bottom: 4px;">Kompetensi Pilihan:</label>
+                            <div id="showKompetensiPilihan" style="color: #1f2937; background: #f8f9fa; padding: 10px; border-radius: 8px; border-left: 4px solid #059669; white-space: pre-line;"></div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeShowModal()">Tutup</button>
@@ -949,6 +973,50 @@
                                     <option value="4">4 Tahun</option>
                                     <option value="5">5 Tahun</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="kompetensi_inti">Kompetensi Inti</label>
+                                <textarea id="kompetensi_inti" name="kompetensi_inti" rows="4" 
+                                    placeholder="Masukkan kompetensi inti yang akan diajarkan dalam pelatihan ini..."
+                                    style="
+                                        width: 100%;
+                                        padding: 12px 15px;
+                                        border: 2px solid #e5e7eb;
+                                        border-radius: 10px;
+                                        font-size: 14px;
+                                        transition: all 0.3s ease;
+                                        background-color: white;
+                                        box-sizing: border-box;
+                                        resize: vertical;
+                                        font-family: inherit;
+                                    "
+                                    onfocus="this.style.borderColor='#1e40af'" 
+                                    onblur="this.style.borderColor='#e5e7eb'"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="kompetensi_pilihan">Kompetensi Pilihan</label>
+                                <textarea id="kompetensi_pilihan" name="kompetensi_pilihan" rows="4" 
+                                    placeholder="Masukkan kompetensi pilihan yang dapat dipilih dalam pelatihan ini..."
+                                    style="
+                                        width: 100%;
+                                        padding: 12px 15px;
+                                        border: 2px solid #e5e7eb;
+                                        border-radius: 10px;
+                                        font-size: 14px;
+                                        transition: all 0.3s ease;
+                                        background-color: white;
+                                        box-sizing: border-box;
+                                        resize: vertical;
+                                        font-family: inherit;
+                                    "
+                                    onfocus="this.style.borderColor='#1e40af'" 
+                                    onblur="this.style.borderColor='#e5e7eb'"></textarea>
                             </div>
                         </div>
                     </form>
@@ -1108,6 +1176,8 @@
             document.getElementById('jabatan').value = pelatihan.jabatan || '';
             document.getElementById('sertifikat').value = pelatihan.sertifikat || '';
             document.getElementById('tenggat_sertifikat').value = pelatihan.tenggat_sertifikat || '';
+            document.getElementById('kompetensi_inti').value = pelatihan.kompetensi_inti || '';
+            document.getElementById('kompetensi_pilihan').value = pelatihan.kompetensi_pilihan || '';
 
             // Update modal title dan button
             document.getElementById('modalTitle').textContent = 'Edit Data Pelatihan';
@@ -1186,6 +1256,22 @@
                 document.getElementById('showStatusSertifikat').textContent = '-';
             }
 
+            // Tampilkan kompetensi inti
+            const kompetensiInti = pelatihan.kompetensi_inti;
+            if (kompetensiInti && kompetensiInti.trim() !== '') {
+                document.getElementById('showKompetensiInti').textContent = kompetensiInti;
+            } else {
+                document.getElementById('showKompetensiInti').textContent = 'Belum ada data kompetensi inti';
+            }
+
+            // Tampilkan kompetensi pilihan
+            const kompetensiPilihan = pelatihan.kompetensi_pilihan;
+            if (kompetensiPilihan && kompetensiPilihan.trim() !== '') {
+                document.getElementById('showKompetensiPilihan').textContent = kompetensiPilihan;
+            } else {
+                document.getElementById('showKompetensiPilihan').textContent = 'Belum ada data kompetensi pilihan';
+            }
+
             // Tampilkan modal
             document.getElementById('showPelatihanModal').style.display = 'block';
             document.body.style.overflow = 'hidden';
@@ -1219,7 +1305,9 @@
                 divisi: formData.get('divisi'),
                 jabatan: formData.get('jabatan'),
                 sertifikat: formData.get('sertifikat'),
-                tenggat_sertifikat: parseInt(formData.get('tenggat_sertifikat'))
+                tenggat_sertifikat: parseInt(formData.get('tenggat_sertifikat')),
+                kompetensi_inti: formData.get('kompetensi_inti'),
+                kompetensi_pilihan: formData.get('kompetensi_pilihan')
             };
 
 

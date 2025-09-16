@@ -33,6 +33,8 @@ class PelatihanController extends Controller
             'durasi' => 'required|string|max:255',
             'sertifikat' => 'required|string|max:255',
             'tenggat_sertifikat' => 'required|integer|min:1|max:5',
+            'kompetensi_inti' => 'nullable|string',
+            'kompetensi_pilihan' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -104,6 +106,8 @@ class PelatihanController extends Controller
             'durasi' => 'required|string|max:255',
             'sertifikat' => 'required|string|max:255',
             'tenggat_sertifikat' => 'required|integer|min:1|max:5',
+            'kompetensi_inti' => 'nullable|string',
+            'kompetensi_pilihan' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {

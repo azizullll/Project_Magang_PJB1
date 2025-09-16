@@ -21,7 +21,9 @@ class Pelatihan extends Model
         'biaya',
         'durasi',
         'sertifikat',
-        'tenggat_sertifikat'
+        'tenggat_sertifikat',
+        'kompetensi_inti',
+        'kompetensi_pilihan'
     ];
 
     protected $casts = [
