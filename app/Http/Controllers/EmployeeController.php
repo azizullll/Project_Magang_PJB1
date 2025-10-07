@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Certification;
 use App\Models\Employee;
+use App\Models\Division;
+use App\Models\JobPosition;
+use App\Models\CompetencyLevel;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -29,7 +32,10 @@ class EmployeeController extends Controller
     public function create(): View
     {
         $certifications = Certification::orderBy('name')->get();
-        return view('employees.create', compact('certifications'));
+        $divisions = Division::where('is_active', true)->orderBy('name')->get();
+        $jobPositions = JobPosition::where('is_active', true)->with('division')->orderBy('name')->get();
+        $competencyLevels = CompetencyLevel::where('is_active', true)->orderBy('level')->get();
+        return view('employees.create', compact('certifications', 'divisions', 'jobPositions', 'competencyLevels'));
     }
 
     public function show(Employee $employee): View
@@ -47,7 +53,7 @@ class EmployeeController extends Controller
             'alamat' => ['nullable', 'string', 'max:500'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'jabatan' => ['required', 'string', 'max:150'],
-            'divisi' => ['nullable', 'string', 'max:150'],
+            'divisi' => ['required', 'integer', 'exists:divisions,id'],
             'masa_kerja_tahun' => ['required', 'integer', 'min:0', 'max:100'],
             'level_kompetensi' => ['nullable', 'string', 'max:100'],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -58,6 +64,10 @@ class EmployeeController extends Controller
             'certificates.*.expiration_date' => ['nullable', 'date', 'after_or_equal:certificates.*.issued_date'],
             'certificates.*.image' => ['nullable', 'image', 'max:5120'],
         ]);
+
+        // Get division name from ID
+        $division = Division::find($validated['divisi']);
+        $divisionName = $division ? $division->name : null;
 
         $levelDefault = $this->tentukanLevelDefault((int) $validated['masa_kerja_tahun']);
         $level = $validated['level_kompetensi'] ?? $levelDefault;
@@ -74,7 +84,7 @@ class EmployeeController extends Controller
             'alamat' => $validated['alamat'] ?? null,
             'no_telp' => $validated['no_telp'] ?? null,
             'jabatan' => $validated['jabatan'],
-            'divisi' => $validated['divisi'] ?? null,
+            'divisi' => $divisionName,
             'masa_kerja_tahun' => (int) $validated['masa_kerja_tahun'],
             'level_kompetensi' => $level,
             'foto_path' => $fotoPath,
@@ -113,7 +123,10 @@ class EmployeeController extends Controller
     {
         $employee->load('certifications');
         $certifications = Certification::orderBy('name')->get();
-        return view('employees.edit', compact('employee', 'certifications'));
+        $divisions = Division::where('is_active', true)->orderBy('name')->get();
+        $jobPositions = JobPosition::where('is_active', true)->with('division')->orderBy('name')->get();
+        $competencyLevels = CompetencyLevel::where('is_active', true)->orderBy('level')->get();
+        return view('employees.edit', compact('employee', 'certifications', 'divisions', 'jobPositions', 'competencyLevels'));
     }
 
     public function update(Request $request, Employee $employee): RedirectResponse
@@ -125,7 +138,7 @@ class EmployeeController extends Controller
             'alamat' => ['nullable', 'string', 'max:500'],
             'no_telp' => ['nullable', 'string', 'max:20'],
             'jabatan' => ['required', 'string', 'max:150'],
-            'divisi' => ['nullable', 'string', 'max:150'],
+            'divisi' => ['required', 'integer', 'exists:divisions,id'],
             'masa_kerja_tahun' => ['required', 'integer', 'min:0', 'max:100'],
             'level_kompetensi' => ['nullable', 'string', 'max:100'],
             'foto' => ['nullable', 'image', 'max:2048'],
@@ -137,6 +150,10 @@ class EmployeeController extends Controller
             'certificates.*.image' => ['nullable', 'image', 'max:5120'],
         ]);
 
+        // Get division name from ID
+        $division = Division::find($validated['divisi']);
+        $divisionName = $division ? $division->name : null;
+
         $levelDefault = $this->tentukanLevelDefault((int) $validated['masa_kerja_tahun']);
         $level = $validated['level_kompetensi'] ?? $levelDefault;
 
@@ -147,7 +164,7 @@ class EmployeeController extends Controller
             'alamat' => $validated['alamat'] ?? null,
             'no_telp' => $validated['no_telp'] ?? null,
             'jabatan' => $validated['jabatan'],
-            'divisi' => $validated['divisi'] ?? null,
+            'divisi' => $divisionName,
             'masa_kerja_tahun' => (int) $validated['masa_kerja_tahun'],
             'level_kompetensi' => $level,
         ];
@@ -292,6 +309,36 @@ class EmployeeController extends Controller
         }
 
         return redirect()->back()->with('success', 'Sertifikat berhasil dihapus.');
+    }
+
+    /**
+     * Get job positions by division
+     */
+    public function getJobPositionsByDivision(Request $request)
+    {
+        $divisionId = $request->input('division_id');
+        $jobPositions = JobPosition::where('division_id', $divisionId)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'competency_level']);
+
+        return response()->json($jobPositions);
+    }
+
+    /**
+     * Get competency level by job position
+     */
+    public function getCompetencyLevelByJobPosition(Request $request)
+    {
+        $jobPositionId = $request->input('job_position_id');
+        $jobPosition = JobPosition::find($jobPositionId);
+        
+        if ($jobPosition) {
+            $competencyLevel = CompetencyLevel::where('level', $jobPosition->competency_level)->first();
+            return response()->json($competencyLevel);
+        }
+
+        return response()->json(null);
     }
 }
 

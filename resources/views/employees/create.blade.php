@@ -221,43 +221,30 @@
 
         <div class="form-row">
             <div class="form-group">
-                <label for="jabatan" class="form-label">Jabatan <span style="color: #dc2626;">*</span></label>
-                <select id="jabatan" name="jabatan" class="form-select @error('jabatan') is-invalid @enderror" required>
-                    <option value="">Pilih Jabatan</option>
-                    <option value="Manager" {{ old('jabatan') == 'Manager' ? 'selected' : '' }}>Manager</option>
-                    <option value="Supervisor" {{ old('jabatan') == 'Supervisor' ? 'selected' : '' }}>Supervisor</option>
-                    <option value="Staff" {{ old('jabatan') == 'Staff' ? 'selected' : '' }}>Staff</option>
-                    <option value="Operator" {{ old('jabatan') == 'Operator' ? 'selected' : '' }}>Operator</option>
-                    <option value="Technician" {{ old('jabatan') == 'Technician' ? 'selected' : '' }}>Technician</option>
-                    <option value="Engineer" {{ old('jabatan') == 'Engineer' ? 'selected' : '' }}>Engineer</option>
-                    <option value="Analyst" {{ old('jabatan') == 'Analyst' ? 'selected' : '' }}>Analyst</option>
-                    <option value="Coordinator" {{ old('jabatan') == 'Coordinator' ? 'selected' : '' }}>Coordinator</option>
-                    <option value="Specialist" {{ old('jabatan') == 'Specialist' ? 'selected' : '' }}>Specialist</option>
-                    <option value="Assistant" {{ old('jabatan') == 'Assistant' ? 'selected' : '' }}>Assistant</option>
-                </select>
-                @error('jabatan')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
                 <label for="divisi" class="form-label">Divisi <span style="color: #dc2626;">*</span></label>
-                <select id="divisi" name="divisi" class="form-select @error('divisi') is-invalid @enderror">
+                <select id="divisi" name="divisi" class="form-select @error('divisi') is-invalid @enderror" required onchange="loadJobPositions()">
                     <option value="">Pilih Divisi</option>
-                    <option value="IT" {{ old('divisi') == 'IT' ? 'selected' : '' }}>IT</option>
-                    <option value="HR" {{ old('divisi') == 'HR' ? 'selected' : '' }}>HR</option>
-                    <option value="Finance" {{ old('divisi') == 'Finance' ? 'selected' : '' }}>Finance</option>
-                    <option value="Marketing" {{ old('divisi') == 'Marketing' ? 'selected' : '' }}>Marketing</option>
-                    <option value="Operations" {{ old('divisi') == 'Operations' ? 'selected' : '' }}>Operations</option>
-                    <option value="Maintenance" {{ old('divisi') == 'Maintenance' ? 'selected' : '' }}>Maintenance</option>
-                    <option value="Production" {{ old('divisi') == 'Production' ? 'selected' : '' }}>Production</option>
-                    <option value="Quality Control" {{ old('divisi') == 'Quality Control' ? 'selected' : '' }}>Quality Control</option>
+                    @foreach($divisions as $division)
+                        <option value="{{ $division->id }}" {{ old('divisi') == $division->id ? 'selected' : '' }}>{{ $division->name }}</option>
+                    @endforeach
                 </select>
                 @error('divisi')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
 
+            <div class="form-group">
+                <label for="jabatan" class="form-label">Jabatan <span style="color: #dc2626;">*</span></label>
+                <select id="jabatan" name="jabatan" class="form-select @error('jabatan') is-invalid @enderror" required onchange="loadCompetencyLevel()">
+                    <option value="">Pilih Divisi terlebih dahulu</option>
+                </select>
+                @error('jabatan')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+            </div>
+        </div>
+
+        <div class="form-row">
             <div class="form-group">
                 <label for="masa_kerja_tahun" class="form-label">Masa Kerja (Tahun) <span style="color: #dc2626;">*</span></label>
                 <input type="number" id="masa_kerja_tahun" name="masa_kerja_tahun" class="form-control @error('masa_kerja_tahun') is-invalid @enderror" 
@@ -266,23 +253,19 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-        </div>
 
-        <div class="form-row">
             <div class="form-group">
-                <label for="level_kompetensi" class="form-label">Level Kompetensi (opsional)</label>
+                <label for="level_kompetensi" class="form-label">Level Kompetensi</label>
                 <select id="level_kompetensi" name="level_kompetensi" class="form-select @error('level_kompetensi') is-invalid @enderror">
-                    <option value="">Otomatis dari masa kerja</option>
-                    @php($levels = ['Pemula','Terampil','Ahli Muda','Ahli Madya'])
-                    @foreach($levels as $lv)
-                        <option value="{{ $lv }}" {{ old('level_kompetensi') == $lv ? 'selected' : '' }}>{{ $lv }}</option>
+                    <option value="">Otomatis dari jabatan</option>
+                    @foreach($competencyLevels as $level)
+                        <option value="{{ $level->name }}" {{ old('level_kompetensi') == $level->name ? 'selected' : '' }}>Level {{ $level->level }} - {{ $level->name }}</option>
                     @endforeach
                 </select>
                 @error('level_kompetensi')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
             </div>
-            
         </div>
 
         <div class="form-group">
@@ -374,26 +357,28 @@ function addCertificate() {
             </div>
             
             <div class="form-row">
-                <div class="form-group">
+                <div class="form-group" style="position: relative;">
                     <label class="form-label">Kode Sertifikasi <span style="color: #dc2626;">*</span></label>
-                    <input type="text" name="certificates[${certificateIndex}][code]" class="form-control" placeholder="Contoh: K3-001" required>
+                    <input type="text" name="certificates[${certificateIndex}][code]" class="form-control cert-code-input" data-index="${certificateIndex}" placeholder="Contoh: K3-001" autocomplete="off" required>
+                    <div class="cert-suggestions" data-index="${certificateIndex}" style="position:absolute; top: 70px; left:0; right:0; background:white; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 4px 8px rgba(0,0,0,.08); z-index:50; display:none; max-height: 180px; overflow:auto;"></div>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Nama Sertifikasi</label>
-                    <input type="text" name="certificates[${certificateIndex}][name]" class="form-control" placeholder="Contoh: K3 Umum">
+                    <input type="text" name="certificates[${certificateIndex}][name]" class="form-control cert-name-input" data-index="${certificateIndex}" placeholder="Contoh: K3 Umum">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Tanggal Diterbitkan</label>
-                    <input type="date" name="certificates[${certificateIndex}][issued_date]" class="form-control">
+                    <input type="date" name="certificates[${certificateIndex}][issued_date]" class="form-control cert-issued-input" data-index="${certificateIndex}">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Tanggal Berlaku Sampai</label>
-                    <input type="date" name="certificates[${certificateIndex}][expiration_date]" class="form-control">
+                    <label class="form-label">Aktif Hingga (Tahun)</label>
+                    <input type="number" name="certificates[${certificateIndex}][active_years]" class="form-control cert-years-input" data-index="${certificateIndex}" placeholder="Contoh: 3" min="0" readonly>
+                    <input type="hidden" name="certificates[${certificateIndex}][expiration_date]" class="cert-expiration-hidden" data-index="${certificateIndex}">
                 </div>
             </div>
             
@@ -413,11 +398,86 @@ function addCertificate() {
     `;
     
     container.insertAdjacentHTML('beforeend', certificateHtml);
+    attachCertificateBehaviors(certificateIndex);
     certificateIndex++;
 }
 
 function removeCertificate(button) {
     button.closest('.certificate-entry').remove();
+}
+
+// Autocomplete dan hitung expiration berdasarkan tahun aktif
+function attachCertificateBehaviors(index) {
+    const codeInput = document.querySelector(`input.cert-code-input[data-index="${index}"]`);
+    const nameInput = document.querySelector(`input.cert-name-input[data-index="${index}"]`);
+    const issuedInput = document.querySelector(`input.cert-issued-input[data-index="${index}"]`);
+    const yearsInput = document.querySelector(`input.cert-years-input[data-index="${index}"]`);
+    const expHidden = document.querySelector(`input.cert-expiration-hidden[data-index="${index}"]`);
+    const suggestionBox = document.querySelector(`.cert-suggestions[data-index="${index}"]`);
+
+    function renderSuggestions(items) {
+        if (!items || items.length === 0) { suggestionBox.style.display = 'none'; return; }
+        suggestionBox.innerHTML = items.map(it => `
+            <div class="cert-suggestion-item" data-code="${it.kode}" data-name="${it.nama}" data-years="${it.certificate_active_years}" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f3f4f6;">
+                <div style="font-weight:600; color:#1f2937;">${it.kode}</div>
+                <div style="font-size:12px; color:#6b7280;">${it.nama}${it.certificate_active_years != null ? ` • Aktif ${it.certificate_active_years} th` : ''}</div>
+            </div>
+        `).join('');
+        suggestionBox.style.display = 'block';
+        suggestionBox.querySelectorAll('.cert-suggestion-item').forEach(el => {
+            el.addEventListener('click', () => {
+                codeInput.value = el.getAttribute('data-code');
+                nameInput.value = el.getAttribute('data-name');
+                const years = el.getAttribute('data-years');
+                if (years && years !== 'null') {
+                    yearsInput.value = years;
+                    // Trigger recompute
+                    const evt = new Event('input');
+                    yearsInput.dispatchEvent(evt);
+                }
+                suggestionBox.style.display = 'none';
+            });
+        });
+    }
+
+    let fetchTimer;
+    codeInput.addEventListener('input', function() {
+        const q = this.value.trim();
+        if (fetchTimer) clearTimeout(fetchTimer);
+        if (q.length < 2) { suggestionBox.style.display = 'none'; return; }
+        fetchTimer = setTimeout(() => {
+            fetch(`/api/trainings/search?q=${encodeURIComponent(q)}`)
+                .then(res => res.json())
+                .then(json => {
+                    if (json && json.success && Array.isArray(json.data)) {
+                        renderSuggestions(json.data);
+                    } else { suggestionBox.style.display = 'none'; }
+                })
+                .catch(() => { suggestionBox.style.display = 'none'; });
+        }, 250);
+    });
+    document.addEventListener('click', (e) => {
+        if (!suggestionBox.contains(e.target) && e.target !== codeInput) {
+            suggestionBox.style.display = 'none';
+        }
+    });
+
+    function recomputeExpiration() {
+        const issued = issuedInput.value ? new Date(issuedInput.value) : null;
+        const years = yearsInput.value ? parseInt(yearsInput.value, 10) : null;
+        if (issued && years != null && !isNaN(years)) {
+            const exp = new Date(issued);
+            exp.setFullYear(exp.getFullYear() + years);
+            const yyyy = exp.getFullYear();
+            const mm = String(exp.getMonth() + 1).padStart(2, '0');
+            const dd = String(exp.getDate()).padStart(2, '0');
+            expHidden.value = `${yyyy}-${mm}-${dd}`;
+        } else {
+            expHidden.value = '';
+        }
+    }
+    issuedInput.addEventListener('change', recomputeExpiration);
+    yearsInput.addEventListener('input', recomputeExpiration);
 }
 
 function previewCertificateImageAtIndex(input, index) {
@@ -433,6 +493,53 @@ function previewCertificateImageAtIndex(input, index) {
         reader.readAsDataURL(file);
     } else {
         preview.style.display = 'none';
+    }
+}
+
+// Load job positions based on selected division
+function loadJobPositions() {
+    const divisionId = document.getElementById('divisi').value;
+    const jobPositionSelect = document.getElementById('jabatan');
+    const competencyLevelSelect = document.getElementById('level_kompetensi');
+    
+    // Clear job positions and competency level
+    jobPositionSelect.innerHTML = '<option value="">Pilih Jabatan</option>';
+    competencyLevelSelect.value = '';
+    
+    if (divisionId) {
+        fetch(`/api/job-positions-by-division?division_id=${divisionId}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(job => {
+                    const option = document.createElement('option');
+                    option.value = job.name;
+                    option.textContent = job.name;
+                    option.setAttribute('data-competency-level', job.competency_level);
+                    jobPositionSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading job positions:', error);
+            });
+    }
+}
+
+// Load competency level based on selected job position
+function loadCompetencyLevel() {
+    const jobPositionSelect = document.getElementById('jabatan');
+    const competencyLevelSelect = document.getElementById('level_kompetensi');
+    const selectedOption = jobPositionSelect.options[jobPositionSelect.selectedIndex];
+    
+    if (selectedOption && selectedOption.getAttribute('data-competency-level')) {
+        const competencyLevel = selectedOption.getAttribute('data-competency-level');
+        
+        // Find and select the matching competency level
+        for (let option of competencyLevelSelect.options) {
+            if (option.textContent.includes(`Level ${competencyLevel}`)) {
+                option.selected = true;
+                break;
+            }
+        }
     }
 }
 

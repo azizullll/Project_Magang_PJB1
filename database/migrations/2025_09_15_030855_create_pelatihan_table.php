@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('pelatihan')) {
         Schema::create('pelatihan', function (Blueprint $table) {
             $table->id();
             $table->string('bidang');
@@ -21,6 +22,7 @@ return new class extends Migration
             $table->integer('level');
             $table->timestamps();
         });
+        }
     }
 
     /**

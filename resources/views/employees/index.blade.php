@@ -35,6 +35,10 @@
     .empty-state i { font-size:48px; margin-bottom:16px; color:#d1d5db; }
     .avatar-cell { display:flex; align-items:center; gap:10px; }
     .avatar-meta { display:flex; flex-direction:column; }
+    .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+    .status-green { background:#16a34a; }
+    .status-yellow { background:#f59e0b; }
+    .status-red { background:#dc2626; }
 </style>
 
     <div class="main-content-card">
@@ -91,8 +95,52 @@
                         <td>{{ $emp->masa_kerja_tahun }} tahun</td>
                         <td><span class="level-badge">{{ $emp->level_kompetensi }}</span></td>
                         <td>
-                            @if($emp->certifications->count() > 0)
-                                <span class="badge bg-primary">{{ $emp->certifications->count() }} sertifikat</span>
+                            @php
+                                $countCert = $emp->certifications->count();
+                                $today = \Carbon\Carbon::today();
+                                $nextExpiration = null;
+                                // Ambil tanggal kadaluarsa terdekat (bisa lewat atau akan datang)
+                                $dates = $emp->certifications->map(function($c){ return $c->pivot->expiration_date ?? null; })
+                                    ->filter();
+                                if ($dates->count() > 0) {
+                                    // Cari yang akan datang terdekat
+                                    $upcoming = $dates->filter(function($d) use ($today){ return \Carbon\Carbon::parse($d)->greaterThanOrEqualTo($today); });
+                                    if ($upcoming->count() > 0) {
+                                        $nextExpiration = $upcoming->sortBy(function($d){ return \Carbon\Carbon::parse($d)->timestamp; })->first();
+                                    } else {
+                                        // Jika tidak ada yang akan datang, ambil yang paling dekat (namun sudah lewat)
+                                        $nextExpiration = $dates->sortByDesc(function($d){ return \Carbon\Carbon::parse($d)->timestamp; })->first();
+                                    }
+                                }
+
+                                $statusClass = null; $tooltip = null;
+                                if ($countCert === 0) {
+                                    $statusClass = 'status-red';
+                                    $tooltip = 'Belum memiliki sertifikasi';
+                                } elseif ($nextExpiration) {
+                                    $diff = \Carbon\Carbon::parse($nextExpiration)->diffInDays($today, false); // negatif bila di masa depan
+                                    if ($diff < 0) {
+                                        $daysRemaining = abs($diff);
+                                        if ($daysRemaining <= 30) {
+                                            $statusClass = 'status-yellow';
+                                        } else {
+                                            $statusClass = 'status-green';
+                                        }
+                                        $tooltip = 'Kadaluarsa pada ' . \Carbon\Carbon::parse($nextExpiration)->format('d M Y') . ' (' . $daysRemaining . ' hari lagi)';
+                                    } else {
+                                        $statusClass = 'status-red';
+                                        $tooltip = 'Kadaluarsa ' . $diff . ' hari yang lalu (' . \Carbon\Carbon::parse($nextExpiration)->format('d M Y') . ')';
+                                    }
+                                } else {
+                                    // Tidak ada tanggal kadaluarsa pada sertifikasi
+                                    $statusClass = 'status-green';
+                                    $tooltip = 'Sertifikasi tanpa tanggal kadaluarsa';
+                                }
+                            @endphp
+
+                            <span class="{{ $statusClass }} status-dot" title="{{ $tooltip }}"></span>
+                            @if($countCert > 0)
+                                <span class="badge bg-primary">{{ $countCert }} sertifikat</span>
                             @else
                                 <span class="text-muted">Belum ada</span>
                             @endif
