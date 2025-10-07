@@ -37,6 +37,11 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // Seed master data first
+        $this->call(CompetencyLevelSeeder::class);
+        $this->call(DivisionSeeder::class);
+        $this->call(JobPositionSeeder::class);
+
         // Seed certifications master (beberapa kode umum)
         $codes = ['K3U', 'CM001', 'CA100', 'ISO9001', 'ITILF', 'PMIACP'];
         foreach ($codes as $code) {

@@ -13,11 +13,17 @@ class Certification extends Model
     protected $fillable = [
         'code',
         'name',
-        'bidang',
-        'judul',
+        'category',
+        'divisi',
+        'jabatan',
+        'level',
+        'biaya',
+        'durasi_jam',
+        'sertifikat_diberikan',
+        'masa_aktif_bulan',
         'kompetensi_inti',
         'kompetensi_pilihan',
-        'level',
+        'lembaga',
     ];
 
     /**

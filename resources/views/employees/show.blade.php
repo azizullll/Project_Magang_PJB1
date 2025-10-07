@@ -114,33 +114,35 @@
                     $issuedDate = $cert->pivot->issued_date;
                     $certificateImage = $cert->pivot->certificate_image;
                     
-                    // Calculate status
+                    // Calculate status (match table logic):
+                    // Green: >30 days, Yellow: <=30 days, Red: expired
                     $status = 'active';
                     $statusClass = 'status-active';
                     $statusText = 'status-active-text';
-                    $statusLabel = 'Aktif';
+                    $statusLabel = 'Aktif (>30 hari)';
                     
                     if ($expirationDate) {
                         $today = now();
                         $expiration = \Carbon\Carbon::parse($expirationDate);
-                        $twoMonthsBefore = $expiration->copy()->subMonths(2);
-                        $oneMonthBefore = $expiration->copy()->subMonth();
-                        
-                        if ($today->gt($expiration)) {
+                        $diff = $expiration->diffInDays($today, false); // negatif jika di masa depan
+                        if ($diff >= 0) {
                             $status = 'expired';
                             $statusClass = 'status-expired';
                             $statusText = 'status-expired-text';
-                            $statusLabel = 'Kadaluarsa';
-                        } elseif ($today->gte($twoMonthsBefore) && $today->lt($oneMonthBefore)) {
-                            $status = 'warning';
-                            $statusClass = 'status-warning';
-                            $statusText = 'status-warning-text';
-                            $statusLabel = 'Akan Kadaluarsa (H-2 Bulan)';
-                        } elseif ($today->gte($oneMonthBefore)) {
-                            $status = 'critical';
-                            $statusClass = 'status-critical';
-                            $statusText = 'status-critical-text';
-                            $statusLabel = 'Akan Kadaluarsa (H-1 Bulan)';
+                            $statusLabel = 'Kadaluarsa (' . $diff . ' hari lalu)';
+                        } else {
+                            $daysRemaining = abs($diff);
+                            if ($daysRemaining <= 30) {
+                                $status = 'warning';
+                                $statusClass = 'status-warning';
+                                $statusText = 'status-warning-text';
+                                $statusLabel = 'Akan Kadaluarsa (H-' . $daysRemaining . ' hari)';
+                            } else {
+                                $status = 'active';
+                                $statusClass = 'status-active';
+                                $statusText = 'status-active-text';
+                                $statusLabel = 'Aktif (>30 hari)';
+                            }
                         }
                     }
                 @endphp

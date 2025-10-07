@@ -305,10 +305,10 @@
                     Data Karyawan
                 </a>
             </li>
-            <li class="{{ request()->is('pelatihan') ? 'active' : '' }}">
-                <a href="{{ url('/pelatihan') }}">
-                    <i class="fas fa-graduation-cap"></i>
-                    Pelatihan
+            <li class="{{ request()->is('trainings*') ? 'active' : '' }}">
+                <a href="{{ url('/trainings') }}">
+                    <i class="fas fa-cogs"></i>
+                    Data Pelatihan
                 </a>
             </li>
             <li class="{{ request()->is('data-sertifikasi') ? 'active' : '' }}">
@@ -323,6 +323,7 @@
                     Rekomendasi
                 </a>
             </li>
+            
         </ul>
         <div class="sidebar-footer">
             <span class="logout-icon">
