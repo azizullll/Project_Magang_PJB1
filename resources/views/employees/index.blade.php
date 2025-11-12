@@ -25,7 +25,40 @@
     .employee-table td { padding:15px 12px; border-bottom:1px solid #f3f4f6; font-size:14px; color:#374151; }
     .employee-table tr:hover { background:#f9fafb; }
     .employee-table tr:last-child td { border-bottom:none; }
-    .avatar { width:40px; height:40px; border-radius:50%; object-fit:cover; }
+    .avatar { 
+        width:40px; 
+        height:40px; 
+        border-radius:50%; 
+        object-fit:cover; 
+        display:block; 
+        border:2px solid #e5e7eb; 
+        background:#f8f9fa;
+        transition: all 0.3s ease;
+    }
+    .avatar:hover { 
+        border-color: #3b82f6; 
+        transform: scale(1.05); 
+    }
+    .avatar-placeholder { 
+        width:40px; 
+        height:40px; 
+        border-radius:50%; 
+        background:#1e40af; 
+        display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        border:2px solid #e5e7eb; 
+        transition: all 0.3s ease;
+    }
+    .avatar-placeholder:hover { 
+        background:#2563eb; 
+        transform: scale(1.05); 
+    }
+    .avatar-initial { 
+        color:white; 
+        font-weight:bold; 
+        font-size:16px; 
+    }
     .level-badge { padding:2px 6px; border-radius:4px; font-size:10px; font-weight:600; background:#dbeafe; color:#1e40af; }
     .action-buttons { display:flex; gap:8px; }
     .alert { padding:12px 16px; border-radius:8px; margin-bottom:20px; font-size:14px; }
@@ -33,7 +66,7 @@
     .alert-danger { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
     .empty-state { text-align:center; padding:40px 20px; color:#6b7280; }
     .empty-state i { font-size:48px; margin-bottom:16px; color:#d1d5db; }
-    .avatar-cell { display:flex; align-items:center; gap:10px; }
+    .avatar-cell { display:flex; align-items:center; justify-content:center; gap:10px; min-height:50px; }
     .avatar-meta { display:flex; flex-direction:column; }
     .status-dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:6px; vertical-align:middle; }
     .status-green { background:#16a34a; }
@@ -80,12 +113,42 @@
                     @foreach($employees as $emp)
                     <tr>
                         <td>
-                            @php
-                                $avatar = $emp->foto_path
-                                    ? asset('storage/'.$emp->foto_path)
-                                    : 'https://ui-avatars.com/api/?name=' . urlencode(mb_substr($emp->nama,0,1)) . '&background=1e40af&color=fff&size=40';
-                            @endphp
-                            <img src="{{ $avatar }}" alt="{{ $emp->nama }}" class="avatar">
+                            <div class="avatar-cell">
+                                @php
+                                    // Solusi sederhana dan robust untuk foto karyawan
+                                    $avatarUrl = '';
+                                    $fotoExists = false;
+                                    
+                                    if ($emp->foto_path) {
+                                        $fullPath = storage_path('app/public/' . $emp->foto_path);
+                                        $fotoExists = file_exists($fullPath);
+                                        
+                                        if ($fotoExists) {
+                                            // Gunakan asset() dengan fallback ke URL langsung
+                                            $avatarUrl = asset('storage/' . $emp->foto_path);
+                                            // Jika asset() tidak menghasilkan URL yang benar, gunakan URL langsung
+                                            if (strpos($avatarUrl, 'localhost') !== false && strpos($avatarUrl, ':8000') === false) {
+                                                $avatarUrl = str_replace('http://localhost', 'http://localhost:8000', $avatarUrl);
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Jika tidak ada foto, gunakan avatar dengan inisial
+                                    if (!$fotoExists || !$emp->foto_path) {
+                                        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode(mb_substr($emp->nama, 0, 1)) . '&background=1e40af&color=fff&size=40';
+                                    }
+                                @endphp
+                                
+                                @if($emp->foto_path && $fotoExists)
+                                    <img src="{{ $avatarUrl }}" alt="{{ $emp->nama }}" class="avatar" 
+                                         onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(mb_substr($emp->nama,0,1)) }}&background=1e40af&color=fff&size=40'">
+                                @else
+                                    <div class="avatar-placeholder">
+                                        <span class="avatar-initial">{{ mb_substr($emp->nama,0,1) }}</span>
+                                    </div>
+                                @endif
+                                
+                            </div>
                         </td>
                         <td><strong>{{ $emp->nip }}</strong></td>
                         <td>{{ $emp->nama }}</td>
@@ -96,20 +159,34 @@
                         <td><span class="level-badge">{{ $emp->level_kompetensi }}</span></td>
                         <td>
                             @php
-                                $countCert = $emp->certifications->count();
+                                // Gabungkan sertifikasi (lama) dan trainings (baru)
                                 $today = \Carbon\Carbon::today();
+                                $totalTrainings = $emp->trainings->count();
+                                $totalLegacyCertifications = $emp->certifications->count();
+                                $countCert = $totalTrainings + $totalLegacyCertifications;
+
                                 $nextExpiration = null;
-                                // Ambil tanggal kadaluarsa terdekat (bisa lewat atau akan datang)
-                                $dates = $emp->certifications->map(function($c){ return $c->pivot->expiration_date ?? null; })
-                                    ->filter();
-                                if ($dates->count() > 0) {
-                                    // Cari yang akan datang terdekat
-                                    $upcoming = $dates->filter(function($d) use ($today){ return \Carbon\Carbon::parse($d)->greaterThanOrEqualTo($today); });
+                                $allDates = collect();
+
+                                // tanggal dari trainings (baru)
+                                foreach ($emp->trainings as $t) {
+                                    if (!empty($t->pivot->expiration_date)) {
+                                        $allDates->push($t->pivot->expiration_date);
+                                    }
+                                }
+                                // tanggal dari certifications (lama)
+                                foreach ($emp->certifications as $c) {
+                                    if (!empty($c->pivot->expiration_date)) {
+                                        $allDates->push($c->pivot->expiration_date);
+                                    }
+                                }
+
+                                if ($allDates->count() > 0) {
+                                    $upcoming = $allDates->filter(function($d) use ($today){ return \Carbon\Carbon::parse($d)->greaterThanOrEqualTo($today); });
                                     if ($upcoming->count() > 0) {
                                         $nextExpiration = $upcoming->sortBy(function($d){ return \Carbon\Carbon::parse($d)->timestamp; })->first();
                                     } else {
-                                        // Jika tidak ada yang akan datang, ambil yang paling dekat (namun sudah lewat)
-                                        $nextExpiration = $dates->sortByDesc(function($d){ return \Carbon\Carbon::parse($d)->timestamp; })->first();
+                                        $nextExpiration = $allDates->sortByDesc(function($d){ return \Carbon\Carbon::parse($d)->timestamp; })->first();
                                     }
                                 }
 
@@ -118,21 +195,16 @@
                                     $statusClass = 'status-red';
                                     $tooltip = 'Belum memiliki sertifikasi';
                                 } elseif ($nextExpiration) {
-                                    $diff = \Carbon\Carbon::parse($nextExpiration)->diffInDays($today, false); // negatif bila di masa depan
+                                    $diff = \Carbon\Carbon::parse($nextExpiration)->diffInDays($today, false);
                                     if ($diff < 0) {
                                         $daysRemaining = abs($diff);
-                                        if ($daysRemaining <= 30) {
-                                            $statusClass = 'status-yellow';
-                                        } else {
-                                            $statusClass = 'status-green';
-                                        }
+                                        $statusClass = $daysRemaining <= 30 ? 'status-yellow' : 'status-green';
                                         $tooltip = 'Kadaluarsa pada ' . \Carbon\Carbon::parse($nextExpiration)->format('d M Y') . ' (' . $daysRemaining . ' hari lagi)';
                                     } else {
                                         $statusClass = 'status-red';
                                         $tooltip = 'Kadaluarsa ' . $diff . ' hari yang lalu (' . \Carbon\Carbon::parse($nextExpiration)->format('d M Y') . ')';
                                     }
                                 } else {
-                                    // Tidak ada tanggal kadaluarsa pada sertifikasi
                                     $statusClass = 'status-green';
                                     $tooltip = 'Sertifikasi tanpa tanggal kadaluarsa';
                                 }
@@ -183,6 +255,27 @@
             setTimeout(function() { alert.remove(); }, 500);
         });
     }, 5000);
+
+    // Pastikan avatar dimuat dengan benar
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatars = document.querySelectorAll('.avatar');
+        avatars.forEach(function(avatar) {
+            avatar.addEventListener('error', function() {
+                // Jika foto gagal dimuat, gunakan avatar default
+                const name = this.alt || 'User';
+                this.src = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name.charAt(0)) + '&background=1e40af&color=fff&size=40';
+            });
+            
+            // Tambahkan loading state
+            avatar.addEventListener('load', function() {
+                this.style.opacity = '1';
+            });
+            
+            // Set initial opacity untuk smooth loading
+            avatar.style.opacity = '0.7';
+            avatar.style.transition = 'opacity 0.3s ease';
+        });
+    });
 </script>
 @endsection
 

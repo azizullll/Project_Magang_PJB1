@@ -92,7 +92,14 @@
     }
     .employee-table tr:hover { background: #f9fafb; }
     .employee-table tr:last-child td { border-bottom: none; }
-    .avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+    .avatar { 
+        width: 40px; 
+        height: 40px; 
+        border-radius: 50%; 
+        object-fit: cover; 
+        border: 2px solid #e5e7eb;
+        display: block;
+    }
     .level-badge { 
         padding: 2px 6px; 
         border-radius: 4px; 
@@ -135,6 +142,36 @@
     .badge-warning { background: #fef3c7; color: #92400e; }
     .badge-danger { background: #fef2f2; color: #991b1b; }
     .badge-secondary { background: #f1f5f9; color: #64748b; }
+    .filter-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        align-items: end;
+        flex-wrap: wrap;
+    }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .filter-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        text-transform: uppercase;
+    }
+    .btn-secondary {
+        background: #6b7280;
+        color: white;
+    }
+    .btn-secondary:hover {
+        background: #4b5563;
+    }
 </style>
 
 <div class="main-content-card">
@@ -145,18 +182,31 @@
     @endif
 
     <div class="content-header">
-        <h2 class="content-title">Data Sertifikasi Karyawan</h2>
+        <h2 class="content-title">Data Sertifikat Karyawan</h2>
         <div class="search-form">
-            <form action="{{ route('certifications.index') }}" method="get" style="display:flex; align-items:center; gap:10px; flex-wrap: wrap;">
-                <input type="text" name="search" placeholder="Cari nama, NIP, atau email..." value="{{ request('search') }}" class="search-input">
+            <input type="text" name="search" placeholder="Cari nama, NIP, atau email..." value="{{ request('search') }}" class="search-input" form="searchForm">
+            <button type="submit" form="searchForm" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            <a href="{{ route('certifications.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Tambah ke Pelatihan</a>
+            <form id="searchForm" action="{{ route('certifications.index') }}" method="get" style="display: none;"></form>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form action="{{ route('certifications.index') }}" method="get" class="filter-row">
+            <div class="filter-group">
+                <label class="filter-label">Divisi</label>
                 <select name="division" class="filter-select">
                     <option value="">Semua Divisi</option>
-                    @foreach($divisions as $division)
-                        <option value="{{ $division->id }}" {{ request('division') == $division->id ? 'selected' : '' }}>
-                            {{ $division->name }}
+                    @foreach($divisions as $divisionName)
+                        <option value="{{ $divisionName }}" {{ request('division') == $divisionName ? 'selected' : '' }}>
+                            {{ $divisionName }}
                         </option>
                     @endforeach
                 </select>
+            </div>
+            <div class="filter-group">
+                <label class="filter-label">Status</label>
                 <select name="status" class="filter-select">
                     <option value="">Semua Status</option>
                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
@@ -164,13 +214,12 @@
                     <option value="expired" {{ request('status') == 'expired' ? 'selected' : '' }}>Kadaluarsa</option>
                     <option value="none" {{ request('status') == 'none' ? 'selected' : '' }}>Belum Ada</option>
                 </select>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-                @if(request()->hasAny(['search', 'division', 'status']))
-                    <a href="{{ route('certifications.index') }}" class="btn btn-warning"><i class="fas fa-times"></i> Reset</a>
-                @endif
-            </form>
-            <a href="{{ route('certifications.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Tambah ke Pelatihan</a>
-        </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            @if(request()->hasAny(['search', 'division', 'status']))
+                <a href="{{ route('certifications.index') }}" class="btn btn-secondary">Reset</a>
+            @endif
+        </form>
     </div>
 
     <table class="employee-table">
@@ -189,7 +238,11 @@
         <tbody>
              @forelse($employees as $index => $employee)
                  @php
-                     $totalCertifications = $employee->certifications->count();
+                     // Count total from both trainings and certifications (for backward compatibility)
+                     $totalTrainings = $employee->trainings->count();
+                     $totalLegacyCertifications = $employee->certifications->count();
+                     $totalCertifications = $totalTrainings + $totalLegacyCertifications;
+                     
                      $expiredCount = 0;
                      $expiringSoonCount = 0;
                      $activeCount = 0;
@@ -197,15 +250,31 @@
                      $nearestExpiration = null;
                      $nearestExpirationDays = null;
  
-                     foreach ($employee->certifications as $certification) {
-                         $expirationDate = \Carbon\Carbon::parse($certification->pivot->expiration_date);
-                         $issuedDate = \Carbon\Carbon::parse($certification->pivot->issued_date);
+                    // Process trainings (new system)
+                    foreach ($employee->trainings as $training) {
+                        // Penyesuaian logika untuk Asmen/Supervisor: boleh "Umum" (level 0) dan level 1-4
+                        if ($employee->jabatan === 'Supervisor(Asmen)') {
+                            $categoryNorm = is_string($training->category) ? mb_strtolower(trim($training->category)) : '';
+                            $levelNorm = (int) ($training->level ?? 0);
+                            // Level 0 (Umum) atau level 1-4 diizinkan
+                            $isAllowed = ($levelNorm == 0) || ($levelNorm >= 1 && $levelNorm <= 4);
+                            if (!$isAllowed) {
+                                continue; // abaikan pelatihan yang tidak sesuai
+                            }
+                        }
+                         $expirationDate = \Carbon\Carbon::parse($training->pivot->expiration_date);
+                         $issuedDate = \Carbon\Carbon::parse($training->pivot->issued_date);
                          $today = \Carbon\Carbon::now();
-                         $diff = $expirationDate->diffInDays($today, false);
+                         $diffDays = $expirationDate->diffInDays($today, false);
+                         $diffMonths = $expirationDate->diffInMonths($today, false);
                          
-                         if ($diff >= 0) {
+                         if ($diffDays >= 0) {
                              $expiredCount++;
-                         } elseif (abs($diff) <= 30) {
+                         } elseif ($diffDays >= -7) {
+                             // H-7 hari atau kurang
+                             $expiringSoonCount++;
+                         } elseif ($diffMonths >= -3) {
+                             // H-3 bulan atau kurang
                              $expiringSoonCount++;
                          } else {
                              $activeCount++;
@@ -213,13 +282,45 @@
  
                          // Find latest certification
                          if ($latestCertification === null || $issuedDate->gt(\Carbon\Carbon::parse($latestCertification->pivot->issued_date))) {
+                             $latestCertification = $training;
+                         }
+ 
+                         // Find nearest expiration
+                         if ($nearestExpiration === null || $expirationDate->lt($nearestExpiration)) {
+                             $nearestExpiration = $expirationDate;
+                             $nearestExpirationDays = abs($diffDays);
+                         }
+                     }
+                     
+                     // Process legacy certifications (old system)
+                     foreach ($employee->certifications as $certification) {
+                         $expirationDate = \Carbon\Carbon::parse($certification->pivot->expiration_date);
+                         $issuedDate = \Carbon\Carbon::parse($certification->pivot->issued_date);
+                         $today = \Carbon\Carbon::now();
+                         $diffDays = $expirationDate->diffInDays($today, false);
+                         $diffMonths = $expirationDate->diffInMonths($today, false);
+                         
+                         if ($diffDays >= 0) {
+                             $expiredCount++;
+                         } elseif ($diffDays >= -7) {
+                             // H-7 hari atau kurang
+                             $expiringSoonCount++;
+                         } elseif ($diffMonths >= -3) {
+                             // H-3 bulan atau kurang
+                             $expiringSoonCount++;
+                         } else {
+                             $activeCount++;
+                         }
+ 
+                         // Find latest certification (compare with trainings)
+                         if ($latestCertification === null || $issuedDate->gt(\Carbon\Carbon::parse($latestCertification->pivot->issued_date))) {
                              $latestCertification = $certification;
                          }
  
                          // Find nearest expiration
                          if ($nearestExpiration === null || $expirationDate->lt($nearestExpiration)) {
                              $nearestExpiration = $expirationDate;
-                             $nearestExpirationDays = abs($diff);
+                             $nearestExpirationDays = abs($diffDays);
                          }
                      }
  
@@ -246,11 +347,29 @@
                     <td>{{ ($employees->currentPage() - 1) * $employees->perPage() + $index + 1 }}</td>
                     <td>
                         <div class="avatar-cell">
-                            @if($employee->foto_path)
-                                <img src="{{ asset('storage/' . $employee->foto_path) }}" alt="{{ $employee->nama }}" class="avatar">
-                            @else
-                                <div style="width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
-                                    {{ strtoupper(substr($employee->nama, 0, 2)) }}
+                            @php
+                                $avatarUrl = '';
+                                $fotoExists = false;
+                                
+                                if ($employee->foto_path) {
+                                    $fullPath = storage_path('app/public/' . $employee->foto_path);
+                                    $fotoExists = file_exists($fullPath);
+                                    
+                                    if ($fotoExists) {
+                                        $avatarUrl = asset('storage/' . $employee->foto_path);
+                                        if (strpos($avatarUrl, 'localhost') !== false && strpos($avatarUrl, ':8000') === false) {
+                                            $avatarUrl = str_replace('http://localhost', 'http://localhost:8000', $avatarUrl);
+                                        }
+                                    }
+                                }
+                            @endphp
+                            @if($employee->foto_path && $fotoExists)
+                                <img src="{{ $avatarUrl }}" alt="{{ $employee->nama }}" class="avatar" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            @endif
+                            @if(!$fotoExists || !$employee->foto_path)
+                                <div style="width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; display: {{ $employee->foto_path && $fotoExists ? 'none' : 'flex' }}; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px;">
+                                    {{ strtoupper(substr($employee->nama, 0, 1)) }}
                                 </div>
                             @endif
                             <div class="avatar-meta">
@@ -272,6 +391,10 @@
                                     <i class="fas fa-calendar"></i> 
                                     Diterbitkan: {{ \Carbon\Carbon::parse($latestCertification->pivot->issued_date)->format('d/m/Y') }}
                                 </small>
+                                <br>
+                                @if(isset($latestCertification->level))
+                                    <span class="level-badge">{{ $latestCertification->level == 0 ? 'Umum' : 'Level ' . $latestCertification->level }}</span>
+                                @endif
                             </div>
                         @else
                             <span style="color: #6b7280;">-</span>
@@ -283,16 +406,19 @@
                     <td>
                         <span class="status-dot {{ $statusDot }}"></span>
                         <span class="badge badge-{{ $statusClass }}">{{ $statusText }}</span>
-                         @if($nearestExpiration && $totalCertifications > 0)
+                        @if($nearestExpiration && $totalCertifications > 0)
                              <br><small style="color: #6b7280;">
                                  @php
                                      $today = \Carbon\Carbon::now();
-                                     $diff = $nearestExpiration->diffInDays($today, false);
+                                     $diffDays = (int) $nearestExpiration->diffInDays($today, false); // negatif jika di masa depan
+                                     $absDays = abs($diffDays);
+                                     $absMonths = abs((int) $nearestExpiration->diffInMonths($today, false));
+                                     $suffix = $diffDays < 0 ? 'lagi' : 'lalu';
                                  @endphp
-                                 @if($diff >= 0)
-                                     {{ $diff }} hari lalu
+                                 @if($absDays > 30)
+                                     {{ $absMonths }} bulan {{ $suffix }}
                                  @else
-                                     {{ abs($diff) }} hari lagi
+                                     {{ $absDays }} hari {{ $suffix }}
                                  @endif
                              </small>
                          @endif

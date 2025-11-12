@@ -395,11 +395,87 @@
         </div>
 
         <div class="stats-container">
+            @if(($showExpiringAlert ?? false) && [($expiringSoonCount ?? 0), ($expiredCount ?? 0)])
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const soon = Number({{ (int) ($expiringSoonCount ?? 0) }});
+                    const expired = Number({{ (int) ($expiredCount ?? 0) }});
+                    const parts = [];
+                    if (expired > 0) parts.push(`${expired} kadaluarsa`);
+                    if (soon > 0) parts.push(`${soon} segera habis (≤ 7 hari)`);
+                    const html = `
+                        <div style="display:flex; align-items:center; gap:12px; justify-content:center; margin-bottom:6px;">
+                            <span style="display:inline-flex; align-items:center; gap:8px; background:#fff6e6; color:#b45309; border:1px solid #fde68a; padding:6px 10px; border-radius:999px; font-weight:600;">
+                                <i class="fas fa-triangle-exclamation"></i> Pengingat Sertifikasi
+                            </span>
+                        </div>
+                        <div style="color:#4b5563; font-size:14px; margin-top:4px;">
+                            Ada <strong>${parts.join(' + ')}</strong>.
+                        </div>
+                        <div style="color:#6b7280; font-size:12px; margin-top:8px;">
+                            Klik tombol di bawah ini untuk membuka halaman Data Sertifikasi.
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        icon: undefined,
+                        iconHtml: '<div style=\"width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#fde68a,#f59e0b);box-shadow:0 4px 16px rgba(245,158,11,.35);\"><i class=\"fas fa-bell\" style=\"color:#92400e;font-size:22px\"></i></div>',
+                        title: '<div style=\"font-weight:700;color:#111827;letter-spacing:.3px;\">Notifikasi Sertifikasi</div>',
+                        html,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        position: 'center',
+                        toast: false,
+                        width: '40rem',
+                        background: '#ffffff',
+                        color: '#111827',
+                        confirmButtonText: 'Buka Data Sertifikasi',
+                        showConfirmButton: true,
+                        showCloseButton: false,
+                        focusConfirm: false,
+                        allowOutsideClick: true,
+                        allowEscapeKey: true,
+                        backdrop: 'rgba(0,0,0,0.35)',
+                        customClass: {
+                            popup: 'swal2-rounded swal2-elevated'
+                        },
+                        buttonsStyling: false,
+                        confirmButtonAriaLabel: 'Buka Data Sertifikasi',
+                        didRender: () => {
+                            const btn = document.querySelector('.swal2-confirm');
+                            if (btn) {
+                                btn.style.background = 'linear-gradient(135deg,#2563eb,#1e40af)';
+                                btn.style.color = '#ffffff';
+                                btn.style.border = '0';
+                                btn.style.borderRadius = '10px';
+                                btn.style.padding = '10px 16px';
+                                btn.style.fontWeight = '600';
+                                btn.style.boxShadow = '0 6px 16px rgba(30,64,175,.25)';
+                            }
+                            const popup = document.querySelector('.swal2-popup');
+                            if (popup) {
+                                popup.style.borderRadius = '16px';
+                                popup.style.boxShadow = '0 20px 45px rgba(0,0,0,.12)';
+                                popup.style.paddingTop = '22px';
+                            }
+                        },
+                        didOpen: (popup) => {
+                            // no-op
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = "{{ route('certifications.index') }}";
+                        }
+                    });
+                });
+                </script>
+            @endif
             <div class="stat-card">
                 <div class="stat-icon-container blue">
                     <i class="fas fa-users stat-icon"></i>
                 </div>
-                <div class="stat-number">156</div>
+                <div class="stat-number">{{ $totalEmployees ?? 0 }}</div>
                 <div class="stat-label">Total Karyawan</div>
             </div>
 
@@ -407,7 +483,7 @@
                 <div class="stat-icon-container green">
                     <i class="fas fa-star stat-icon"></i>
                 </div>
-                <div class="stat-number">24</div>
+                <div class="stat-number">{{ $activeCompetencies ?? 0 }}</div>
                 <div class="stat-label">Kompetensi Aktif</div>
             </div>
 
@@ -415,16 +491,16 @@
                 <div class="stat-icon-container orange">
                     <i class="fas fa-graduation-cap stat-icon"></i>
                 </div>
-                <div class="stat-number">89</div>
+                <div class="stat-number">{{ $completedTrainings ?? 0 }}</div>
                 <div class="stat-label">Pelatihan Selesai</div>
             </div>
 
             <div class="stat-card">
                 <div class="stat-icon-container red">
-                    <i class="fas fa-chart-line stat-icon"></i>
+                    <i class="fas fa-database stat-icon"></i>
                 </div>
-                <div class="stat-number">92%</div>
-                <div class="stat-label">Kinerja Rata-rata</div>
+                <div class="stat-number">{{ $totalTrainings ?? 0 }}</div>
+                <div class="stat-label">Jumlah Data Pelatihan</div>
             </div>
         </div>
 
@@ -439,7 +515,7 @@
                 <div class="col-lg-8 mb-4">
                     <div class="chart-card">
                         <div class="chart-header">
-                            <h6 class="chart-title">Grafik Kompetensi Karyawan</h6>
+                            <h6 class="chart-title">Pelatihan Diikuti per Bulan (12 Bulan Terakhir)</h6>
                         </div>
                         <div class="chart-body">
                             <canvas id="kompetensiChart" width="400" height="200"></canvas>
@@ -453,27 +529,22 @@
                             <h6 class="employee-title">Karyawan Terbaru</h6>
                         </div>
                         <div class="employee-body">
-                            <div class="employee-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="employee-name">Ahmad Rizki</h6>
-                                    <p class="employee-position">Software Developer</p>
+                            @forelse(($latestEmployees ?? []) as $emp)
+                                <div class="employee-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="employee-name">{{ $emp->nama }}</h6>
+                                        <p class="employee-position">{{ $emp->jabatan }}{{ $emp->divisi ? ' • ' . $emp->divisi : '' }}</p>
+                                    </div>
+                                    <span class="status-badge status-new">Baru</span>
                                 </div>
-                                <span class="status-badge status-new">Baru</span>
-                            </div>
-                            <div class="employee-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="employee-name">Sarah Putri</h6>
-                                    <p class="employee-position">UI/UX Designer</p>
+                            @empty
+                                <div class="employee-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="employee-name">Belum ada data</h6>
+                                        <p class="employee-position">-</p>
+                                    </div>
                                 </div>
-                                <span class="status-badge status-active">Aktif</span>
-                            </div>
-                            <div class="employee-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="employee-name">Budi Santoso</h6>
-                                    <p class="employee-position">Project Manager</p>
-                                </div>
-                                <span class="status-badge status-evaluation">Evaluasi</span>
-                            </div>
+                            @endforelse
                         </div>
                     </div>
                 </div>
@@ -486,13 +557,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('kompetensiChart').getContext('2d');
+            const labels = @json($chartLabels ?? []);
+            const seriesData = @json($chartData ?? []);
             const myChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun'],
+                    labels: labels,
                     datasets: [{
-                        label: 'Rata-rata Skor Kompetensi',
-                        data: [7.5, 8.2, 8.0, 8.5, 8.8, 8.5],
+                        label: 'Jumlah Pelatihan',
+                        data: seriesData,
                         backgroundColor: 'rgba(30, 64, 175, 0.8)',
                         borderColor: 'rgba(30, 64, 175, 1)',
                         borderWidth: 2,
@@ -517,7 +590,6 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 10,
                             grid: {
                                 color: 'rgba(0, 0, 0, 0.05)',
                                 drawBorder: false

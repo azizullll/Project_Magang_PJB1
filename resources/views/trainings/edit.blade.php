@@ -210,8 +210,9 @@
                 <label for="level" class="form-label">Level Pelatihan <span style="color: #dc2626;">*</span></label>
                 <select id="level" name="level" class="form-select @error('level') is-invalid @enderror" required>
                     <option value="">Pilih Level</option>
+                    <option value="0" {{ old('level', $training->level) == 0 || old('level', $training->level) == '0' || old('level') == 'umum' ? 'selected' : '' }} data-level="0">Umum</option>
                     @for($i = 1; $i <= 7; $i++)
-                        <option value="{{ $i }}" {{ old('level', $training->level) == $i ? 'selected' : '' }}>Level {{ $i }}</option>
+                        <option value="{{ $i }}" {{ old('level', $training->level) == $i ? 'selected' : '' }} data-level="{{ $i }}">Level {{ $i }}</option>
                     @endfor
                 </select>
                 @error('level')
@@ -225,13 +226,46 @@
         <div class="form-group">
             <label class="form-label">Divisi Relevan <span style="color: #dc2626;">*</span></label>
             <div class="checkbox-group">
-                @foreach($divisions as $division)
-                    <div class="checkbox-item">
-                        <input type="checkbox" id="division_{{ $division->id }}" name="relevant_divisions[]" 
-                               value="{{ $division->id }}" {{ in_array($division->id, old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
-                        <label for="division_{{ $division->id }}">{{ $division->name }}</label>
-                    </div>
-                @endforeach
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_lingkungan" name="relevant_divisions[]" 
+                           value="LINGKUNGAN" {{ in_array('LINGKUNGAN', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_lingkungan">LINGKUNGAN</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_sinfo" name="relevant_divisions[]" 
+                           value="SINFO" {{ in_array('SINFO', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_sinfo">SINFO</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_inventory" name="relevant_divisions[]" 
+                           value="INVENTORY" {{ in_array('INVENTORY', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_inventory">INVENTORY</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_sdm" name="relevant_divisions[]" 
+                           value="SDM" {{ in_array('SDM', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_sdm">SDM</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_har" name="relevant_divisions[]" 
+                           value="HAR" {{ in_array('HAR', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_har">HAR</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_engineering" name="relevant_divisions[]" 
+                           value="ENGINEERING TO" {{ in_array('ENGINEERING TO', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_engineering">ENGINEERING TO</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_keuangan" name="relevant_divisions[]" 
+                           value="KEUANGAN" {{ in_array('KEUANGAN', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_keuangan">KEUANGAN</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="division_sarana" name="relevant_divisions[]" 
+                           value="SARANA" {{ in_array('SARANA', old('relevant_divisions', $training->relevant_divisions ?? [])) ? 'checked' : '' }}>
+                    <label for="division_sarana">SARANA</label>
+                </div>
             </div>
             @error('relevant_divisions')
                 <div class="error-message">{{ $message }}</div>
@@ -241,15 +275,23 @@
         <div class="form-group">
             <label class="form-label">Jabatan Relevan (Opsional)</label>
             <div class="checkbox-group" id="jobPositionsGroup">
-                @foreach($jobPositions as $jobPosition)
-                    <div class="checkbox-item" data-division-id="{{ $jobPosition->division_id }}">
-                        <input type="checkbox" id="job_{{ $jobPosition->id }}" name="relevant_job_positions[]" 
-                               value="{{ $jobPosition->id }}" {{ in_array($jobPosition->id, old('relevant_job_positions', $training->relevant_job_positions ?? [])) ? 'checked' : '' }}>
-                        <label for="job_{{ $jobPosition->id }}">{{ $jobPosition->name }} ({{ $jobPosition->division->name }})</label>
-                    </div>
-                @endforeach
+                <div class="checkbox-item">
+                    <input type="checkbox" id="job_manajer" name="relevant_job_positions[]" 
+                           value="Manajer" {{ in_array('Manajer', old('relevant_job_positions', $training->relevant_job_positions ?? [])) ? 'checked' : '' }}>
+                    <label for="job_manajer">Manajer</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="job_supervisor" name="relevant_job_positions[]" 
+                           value="Supervisor(Asmen)" {{ in_array('Supervisor(Asmen)', old('relevant_job_positions', $training->relevant_job_positions ?? [])) ? 'checked' : '' }}>
+                    <label for="job_supervisor">Supervisor(Asmen)</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="job_staff" name="relevant_job_positions[]" 
+                           value="Staff" {{ in_array('Staff', old('relevant_job_positions', $training->relevant_job_positions ?? [])) ? 'checked' : '' }}>
+                    <label for="job_staff">Staff</label>
+                </div>
             </div>
-            <div style="margin-top:8px; font-size:12px; color:#6b7280;">Tip: Centang lebih dari satu divisi untuk menampilkan jabatan lintas divisi.</div>
+            <div style="margin-top:8px; font-size:12px; color:#6b7280;">Jabatan yang sama berlaku untuk semua divisi.</div>
             @error('relevant_job_positions')
                 <div class="error-message">{{ $message }}</div>
             @enderror
@@ -408,30 +450,74 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <script>
-// Filter jabatan berdasarkan divisi yang dipilih
+// Level restrictions based on job positions
 document.addEventListener('DOMContentLoaded', function() {
-    const divisionCheckboxes = Array.from(document.querySelectorAll('input[name="relevant_divisions[]"]'));
-    const jobItems = Array.from(document.querySelectorAll('#jobPositionsGroup .checkbox-item'));
+    const levelSelect = document.getElementById('level');
+    const jobCheckboxes = Array.from(document.querySelectorAll('input[name="relevant_job_positions[]"]'));
+    const levelOptions = Array.from(levelSelect.querySelectorAll('option'));
 
-    function filterJobPositions() {
-        const selectedDivisionIds = divisionCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
-        if (selectedDivisionIds.length === 0) {
-            jobItems.forEach(item => { item.style.display = ''; });
+    function updateLevelOptions() {
+        const selectedJobs = jobCheckboxes.filter(cb => cb.checked).map(cb => cb.value);
+        
+        // Reset all options
+        levelOptions.forEach(option => {
+            option.style.display = '';
+            option.disabled = false;
+        });
+
+        if (selectedJobs.length === 0) {
+            // If no job selected, show all levels
             return;
         }
-        jobItems.forEach(item => {
-            const divId = item.getAttribute('data-division-id');
-            const visible = selectedDivisionIds.includes(divId);
-            item.style.display = visible ? '' : 'none';
-            if (!visible) {
-                const input = item.querySelector('input[type="checkbox"]');
-                if (input) input.checked = false;
+
+        // Define level restrictions
+        const restrictions = {
+            'Manajer': [], // Can access all levels (0-7)
+            'Supervisor(Asmen)': ['0', '1', '2', '3', '4'], // Umum + Level 1-4
+            'Staff': ['0', '1', '2'] // Umum + Level 1-2
+        };
+
+        // Get allowed levels based on selected jobs
+        let allowedLevels = new Set();
+        selectedJobs.forEach(job => {
+            if (restrictions[job]) {
+                restrictions[job].forEach(level => allowedLevels.add(level));
+            } else {
+                // If job not in restrictions, allow all levels
+                levelOptions.forEach(option => {
+                    if (option.value !== '') allowedLevels.add(option.value);
+                });
             }
         });
+
+        // If Manajer is selected, allow all levels
+        if (selectedJobs.includes('Manajer')) {
+            levelOptions.forEach(option => {
+                if (option.value !== '') allowedLevels.add(option.value);
+            });
+        }
+
+        // Hide/disable options not allowed
+        levelOptions.forEach(option => {
+            if (option.value === '') return; // Keep "Pilih Level" option
+            
+            if (!allowedLevels.has(option.value)) {
+                option.style.display = 'none';
+                option.disabled = true;
+            }
+        });
+
+        // If current selection is not allowed, reset it
+        if (levelSelect.value && !allowedLevels.has(levelSelect.value)) {
+            levelSelect.value = '';
+        }
     }
 
-    divisionCheckboxes.forEach(cb => cb.addEventListener('change', filterJobPositions));
-    filterJobPositions();
+    // Add event listeners
+    jobCheckboxes.forEach(cb => cb.addEventListener('change', updateLevelOptions));
+    
+    // Run on page load
+    updateLevelOptions();
 });
 </script>
 @endsection

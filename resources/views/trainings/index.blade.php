@@ -96,6 +96,11 @@
         border-radius: 8px; 
         overflow: hidden; 
         box-shadow: 0 1px 3px rgba(0,0,0,.1); 
+        min-width: 1200px;
+    }
+    .training-table-wrapper {
+        overflow-x: auto;
+        width: 100%;
     }
     .training-table th { 
         background: #f8f9fa; 
@@ -105,12 +110,70 @@
         color: #374151; 
         border-bottom: 1px solid #e5e7eb; 
         font-size: 14px; 
+        white-space: nowrap;
     }
     .training-table td { 
         padding: 15px 12px; 
         border-bottom: 1px solid #f3f4f6; 
         font-size: 14px; 
         color: #374151; 
+    }
+    /* Kolom Kode */
+    .training-table th:nth-child(1) {
+        width: 100px;
+        min-width: 100px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .training-table td:nth-child(1) {
+        width: 100px;
+        min-width: 100px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    /* Kolom Level */
+    .training-table th:nth-child(4) {
+        width: 90px;
+        min-width: 90px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    .training-table td:nth-child(4) {
+        width: 90px;
+        min-width: 90px;
+        text-align: center;
+        white-space: nowrap;
+    }
+    /* Kolom Divisi Relevan */
+    .training-table th:nth-child(5),
+    .training-table td:nth-child(5) {
+        width: 250px;
+        min-width: 250px;
+        max-width: 350px;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    /* Kolom Biaya */
+    .training-table th:nth-child(6) {
+        width: 150px;
+        min-width: 150px;
+        text-align: right;
+        white-space: nowrap;
+    }
+    .training-table td:nth-child(6) {
+        width: 150px;
+        min-width: 150px;
+        text-align: right;
+        white-space: nowrap;
+    }
+    /* Kolom Lembaga */
+    .training-table th:nth-child(8),
+    .training-table td:nth-child(8) {
+        width: 180px;
+        min-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .training-table tr:hover { 
         background: #f9fafb; 
@@ -213,13 +276,12 @@
 
 <div class="main-content-card">
     <div class="content-header">
-        <h2 class="content-title">Manajemen Data Pelatihan</h2>
+        <h2 class="content-title">Manajemen Data Sertifikasi</h2>
         <div class="search-form">
-            <form action="{{ route('trainings.index') }}" method="get" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                <input type="text" name="q" placeholder="Cari pelatihan..." value="{{ request('q') }}" class="search-input">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-            </form>
+            <input type="text" name="q" placeholder="Cari pelatihan..." value="{{ request('q') }}" class="search-input" form="searchForm">
+            <button type="submit" form="searchForm" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
             <a href="{{ route('trainings.create') }}" class="btn btn-success"><i class="fas fa-plus"></i> Tambah Data Pelatihan</a>
+            <form id="searchForm" action="{{ route('trainings.index') }}" method="get" style="display: none;"></form>
         </div>
     </div>
 
@@ -258,67 +320,66 @@
     </div>
 
     @if($trainings->count() > 0)
-        <table class="training-table">
-            <thead>
-                <tr>
-                    <th>Kode</th>
-                    <th>Nama Pelatihan</th>
-                    <th>Kategori</th>
-                    <th>Level</th>
-                    <th>Divisi Relevan</th>
-                    <th>Biaya</th>
-                    <th>Aktif Hingga (Tahun)</th>
-                    <th>Lembaga</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($trainings as $training)
-                <tr>
-                    <td><strong>{{ $training->code }}</strong></td>
-                    <td>{{ $training->name }}</td>
-                    <td>
-                        <span class="category-badge category-{{ strtolower($training->category) }}">
-                            {{ $training->category }}
-                        </span>
-                    </td>
-                    <td><span class="level-badge">Level {{ $training->level }}</span></td>
-                    <td>
-                        @php
-                            $divisions = \App\Models\Division::whereIn('id', $training->relevant_divisions ?? [])->pluck('name')->toArray();
-                        @endphp
-                        {{ implode(', ', $divisions) }}
-                    </td>
-                    <td>
-                        @if($training->cost)
-                            Rp {{ number_format($training->cost, 0, ',', '.') }}
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td>
-                        @if(!is_null($training->certificate_active_years))
-                            {{ $training->certificate_active_years }} tahun
-                        @else
-                            -
-                        @endif
-                    </td>
-                    <td>{{ $training->institution ?? '-' }}</td>
-                    <td>
-                        <div class="action-buttons">
-                            <a href="{{ route('trainings.show', $training) }}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
-                            <a href="{{ route('trainings.edit', $training) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
-                            <form action="{{ route('trainings.destroy', $training) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data pelatihan ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
+        <div class="training-table-wrapper">
+            <table class="training-table">
+                <thead>
+                    <tr>
+                        <th>Kode</th>
+                        <th>Nama Pelatihan</th>
+                        <th>Kategori</th>
+                        <th>Level</th>
+                        <th>Divisi Relevan</th>
+                        <th>Biaya</th>
+                        <th>Aktif Hingga (Tahun)</th>
+                        <th>Lembaga</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($trainings as $training)
+                    <tr>
+                        <td><strong>{{ $training->code }}</strong></td>
+                        <td>{{ $training->name }}</td>
+                        <td>
+                            <span class="category-badge category-{{ strtolower($training->category) }}">
+                                {{ $training->category }}
+                            </span>
+                        </td>
+                        <td><span class="level-badge">{{ $training->level == 0 ? 'Umum' : 'Level ' . $training->level }}</span></td>
+                        <td>
+                            {{ implode(', ', $training->relevant_divisions ?? []) }}
+                        </td>
+                        <td>
+                            @if($training->cost)
+                                Rp {{ number_format($training->cost, 0, ',', '.') }}
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if(!is_null($training->certificate_active_years))
+                                {{ $training->certificate_active_years }} tahun
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>{{ $training->institution ?? '-' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ route('trainings.show', $training) }}" class="btn btn-primary btn-sm"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('trainings.edit', $training) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('trainings.destroy', $training) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data pelatihan ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
         <div class="pagination">
             {{ $trainings->links() }}

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Training;
-use App\Models\Division;
-use App\Models\JobPosition;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -63,11 +61,9 @@ class TrainingController extends Controller
      */
     public function create(): View
     {
-        $divisions = Division::where('is_active', true)->orderBy('name')->get();
-        $jobPositions = JobPosition::where('is_active', true)->with('division')->orderBy('name')->get();
         $categories = ['Teknis', 'Manajerial', 'K3', 'Softskill'];
         
-        return view('trainings.create', compact('divisions', 'jobPositions', 'categories'));
+        return view('trainings.create', compact('categories'));
     }
 
     /**
@@ -80,10 +76,10 @@ class TrainingController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'category' => ['required', 'string', 'in:Teknis,Manajerial,K3,Softskill'],
             'relevant_divisions' => ['required', 'array', 'min:1'],
-            'relevant_divisions.*' => ['integer', 'exists:divisions,id'],
+            'relevant_divisions.*' => ['string', 'in:LINGKUNGAN,SINFO,INVENTORY,SDM,HAR,ENGINEERING TO,KEUANGAN,SARANA'],
             'relevant_job_positions' => ['nullable', 'array'],
-            'relevant_job_positions.*' => ['integer', 'exists:job_positions,id'],
-            'level' => ['required', 'integer', 'min:1', 'max:7'],
+            'relevant_job_positions.*' => ['string', 'in:Manajer,Supervisor(Asmen),Staff'],
+            'level' => ['required', 'in:0,1,2,3,4,5,6,7'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'duration_days' => ['nullable', 'integer', 'min:0'],
             'certificate_active_years' => ['nullable', 'integer', 'min:0'],
@@ -96,6 +92,9 @@ class TrainingController extends Controller
             'next_competencies' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
         ]);
+
+        // Konversi level ke integer (0 untuk umum)
+        $validated['level'] = (int) $validated['level'];
 
         Training::create($validated);
 
@@ -115,11 +114,9 @@ class TrainingController extends Controller
      */
     public function edit(Training $training): View
     {
-        $divisions = Division::where('is_active', true)->orderBy('name')->get();
-        $jobPositions = JobPosition::where('is_active', true)->with('division')->orderBy('name')->get();
         $categories = ['Teknis', 'Manajerial', 'K3', 'Softskill'];
         
-        return view('trainings.edit', compact('training', 'divisions', 'jobPositions', 'categories'));
+        return view('trainings.edit', compact('training', 'categories'));
     }
 
     /**
@@ -132,10 +129,10 @@ class TrainingController extends Controller
             'name' => ['required', 'string', 'max:200'],
             'category' => ['required', 'string', 'in:Teknis,Manajerial,K3,Softskill'],
             'relevant_divisions' => ['required', 'array', 'min:1'],
-            'relevant_divisions.*' => ['integer', 'exists:divisions,id'],
+            'relevant_divisions.*' => ['string', 'in:LINGKUNGAN,SINFO,INVENTORY,SDM,HAR,ENGINEERING TO,KEUANGAN,SARANA'],
             'relevant_job_positions' => ['nullable', 'array'],
-            'relevant_job_positions.*' => ['integer', 'exists:job_positions,id'],
-            'level' => ['required', 'integer', 'min:1', 'max:7'],
+            'relevant_job_positions.*' => ['string', 'in:Manajer,Supervisor(Asmen),Staff'],
+            'level' => ['required', 'in:0,1,2,3,4,5,6,7'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'duration_days' => ['nullable', 'integer', 'min:0'],
             'certificate_active_years' => ['nullable', 'integer', 'min:0'],
@@ -148,6 +145,9 @@ class TrainingController extends Controller
             'next_competencies' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
         ]);
+
+        // Konversi level ke integer (0 untuk umum)
+        $validated['level'] = (int) $validated['level'];
 
         $training->update($validated);
 

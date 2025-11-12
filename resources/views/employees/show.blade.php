@@ -107,24 +107,59 @@
 
     <div class="certifications-section">
         <h3 class="section-title">Sertifikasi yang Dimiliki</h3>
-        @if($employee->certifications->count())
-            @foreach($employee->certifications as $cert)
+        @php
+            // Satukan riwayat pelatihan (baru) dan sertifikasi (lama)
+            $records = [];
+
+            // Trainings (baru)
+            foreach ($employee->trainings as $t) {
+                $records[] = [
+                    'type' => 'training',
+                    'name' => $t->name,
+                    'code' => $t->code,
+                    'level' => $t->level,
+                    'issued' => $t->pivot->issued_date ?? null,
+                    'expiration' => $t->pivot->expiration_date ?? null,
+                    'image' => null,
+                ];
+            }
+
+            // Legacy certifications (lama)
+            foreach ($employee->certifications as $c) {
+                $records[] = [
+                    'type' => 'legacy',
+                    'name' => $c->name,
+                    'code' => $c->code,
+                    'level' => $c->level ?? null,
+                    'issued' => $c->pivot->issued_date ?? null,
+                    'expiration' => $c->pivot->expiration_date ?? null,
+                    'image' => $c->pivot->certificate_image ?? null,
+                ];
+            }
+
+            // Urutkan terbaru berdasarkan issued date (desc)
+            usort($records, function($a, $b) {
+                $ad = $a['issued'] ? \Carbon\Carbon::parse($a['issued'])->timestamp : 0;
+                $bd = $b['issued'] ? \Carbon\Carbon::parse($b['issued'])->timestamp : 0;
+                return $bd <=> $ad;
+            });
+        @endphp
+
+        @if(count($records) > 0)
+            @foreach($records as $rec)
                 @php
-                    $expirationDate = $cert->pivot->expiration_date;
-                    $issuedDate = $cert->pivot->issued_date;
-                    $certificateImage = $cert->pivot->certificate_image;
-                    
-                    // Calculate status (match table logic):
-                    // Green: >30 days, Yellow: <=30 days, Red: expired
+                    $expirationDate = $rec['expiration'];
+                    $issuedDate = $rec['issued'];
+                    $certificateImage = $rec['image'] ? asset('storage/' . $rec['image']) : '';
+
                     $status = 'active';
                     $statusClass = 'status-active';
                     $statusText = 'status-active-text';
                     $statusLabel = 'Aktif (>30 hari)';
-                    
                     if ($expirationDate) {
                         $today = now();
                         $expiration = \Carbon\Carbon::parse($expirationDate);
-                        $diff = $expiration->diffInDays($today, false); // negatif jika di masa depan
+                        $diff = $expiration->diffInDays($today, false);
                         if ($diff >= 0) {
                             $status = 'expired';
                             $statusClass = 'status-expired';
@@ -146,17 +181,17 @@
                         }
                     }
                 @endphp
-                
-                <div class="certification-card" onclick="openCertificateModal('{{ $cert->name }}', '{{ $cert->code }}', '{{ $certificateImage ? asset('storage/' . $certificateImage) : '' }}', '{{ $issuedDate }}', '{{ $expirationDate }}', '{{ $statusLabel }}', '{{ $cert->bidang ?? '' }}', '{{ $cert->kompetensi_inti ?? '' }}', '{{ $cert->kompetensi_pilihan ?? '' }}', '{{ $cert->level ?? '' }}')">
-                    <button class="delete-certificate-btn" onclick="event.stopPropagation(); deleteCertificate({{ $employee->id }}, {{ $cert->id }}, '{{ $cert->name }}')" title="Hapus Sertifikat">
+
+                <div class="certification-card">
+                    <!-- <button class="delete-certificate-btn" onclick="event.stopPropagation();" title="Hapus Sertifikat">
                         <i class="fas fa-trash"></i>
-                    </button>
+                    </button> -->
                     <div class="certification-header">
-                        <h4 class="certification-name">{{ $cert->name }}</h4>
+                        <h4 class="certification-name">{{ $rec['name'] }}</h4>
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                            <span class="level-badge">Kode: {{ $cert->code }}</span>
-                            @if($cert->level)
-                                <span class="level-badge" style="background: #fef3c7; color: #92400e;">Level: {{ $cert->level }}</span>
+                            <span class="level-badge">Kode: {{ $rec['code'] }}</span>
+                            @if(!is_null($rec['level']))
+                                <span class="level-badge" style="background: #fef3c7; color: #92400e;">{{ (int)$rec['level'] === 0 ? 'Umum' : ('Level: ' . $rec['level']) }}</span>
                             @endif
                         </div>
                     </div>

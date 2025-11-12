@@ -224,9 +224,14 @@
                 <label for="divisi" class="form-label">Divisi <span style="color: #dc2626;">*</span></label>
                 <select id="divisi" name="divisi" class="form-select @error('divisi') is-invalid @enderror" required onchange="loadJobPositions()">
                     <option value="">Pilih Divisi</option>
-                    @foreach($divisions as $division)
-                        <option value="{{ $division->id }}" {{ old('divisi') == $division->id ? 'selected' : '' }}>{{ $division->name }}</option>
-                    @endforeach
+                    <option value="LINGKUNGAN" {{ old('divisi') == 'LINGKUNGAN' ? 'selected' : '' }}>LINGKUNGAN</option>
+                    <option value="SINFO" {{ old('divisi') == 'SINFO' ? 'selected' : '' }}>SINFO</option>
+                    <option value="INVENTORY" {{ old('divisi') == 'INVENTORY' ? 'selected' : '' }}>INVENTORY</option>
+                    <option value="SDM" {{ old('divisi') == 'SDM' ? 'selected' : '' }}>SDM</option>
+                    <option value="HAR" {{ old('divisi') == 'HAR' ? 'selected' : '' }}>HAR</option>
+                    <option value="ENGINEERING TO" {{ old('divisi') == 'ENGINEERING TO' ? 'selected' : '' }}>ENGINEERING TO</option>
+                    <option value="KEUANGAN" {{ old('divisi') == 'KEUANGAN' ? 'selected' : '' }}>KEUANGAN</option>
+                    <option value="SARANA" {{ old('divisi') == 'SARANA' ? 'selected' : '' }}>SARANA</option>
                 </select>
                 @error('divisi')
                     <div class="error-message">{{ $message }}</div>
@@ -236,7 +241,10 @@
             <div class="form-group">
                 <label for="jabatan" class="form-label">Jabatan <span style="color: #dc2626;">*</span></label>
                 <select id="jabatan" name="jabatan" class="form-select @error('jabatan') is-invalid @enderror" required onchange="loadCompetencyLevel()">
-                    <option value="">Pilih Divisi terlebih dahulu</option>
+                    <option value="">Pilih Jabatan</option>
+                    <option value="Manajer" data-jabatan="manajer" {{ old('jabatan') == 'Manajer' ? 'selected' : '' }}>Manajer</option>
+                    <option value="Supervisor(Asmen)" data-jabatan="supervisor" {{ old('jabatan') == 'Supervisor(Asmen)' ? 'selected' : '' }}>Supervisor(Asmen)</option>
+                    <option value="Staff" data-jabatan="staff" {{ old('jabatan') == 'Staff' ? 'selected' : '' }}>Staff</option>
                 </select>
                 @error('jabatan')
                     <div class="error-message">{{ $message }}</div>
@@ -256,10 +264,10 @@
 
             <div class="form-group">
                 <label for="level_kompetensi" class="form-label">Level Kompetensi</label>
-                <select id="level_kompetensi" name="level_kompetensi" class="form-select @error('level_kompetensi') is-invalid @enderror">
+                <select id="level_kompetensi" name="level_kompetensi" class="form-select @error('level_kompetensi') is-invalid @enderror" onchange="filterJabatanByLevel()">
                     <option value="">Otomatis dari jabatan</option>
                     @foreach($competencyLevels as $level)
-                        <option value="{{ $level->name }}" {{ old('level_kompetensi') == $level->name ? 'selected' : '' }}>Level {{ $level->level }} - {{ $level->name }}</option>
+                        <option value="{{ $level->name }}" data-level="{{ $level->level }}" {{ old('level_kompetensi') == $level->name ? 'selected' : '' }}>Level {{ $level->level }} - {{ $level->name }}</option>
                     @endforeach
                 </select>
                 @error('level_kompetensi')
@@ -502,25 +510,13 @@ function loadJobPositions() {
     const jobPositionSelect = document.getElementById('jabatan');
     const competencyLevelSelect = document.getElementById('level_kompetensi');
     
-    // Clear job positions and competency level
-    jobPositionSelect.innerHTML = '<option value="">Pilih Jabatan</option>';
+    // Clear competency level
     competencyLevelSelect.value = '';
     
+    // Job positions are now static for all divisions
     if (divisionId) {
-        fetch(`/api/job-positions-by-division?division_id=${divisionId}`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(job => {
-                    const option = document.createElement('option');
-                    option.value = job.name;
-                    option.textContent = job.name;
-                    option.setAttribute('data-competency-level', job.competency_level);
-                    jobPositionSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading job positions:', error);
-            });
+        // Job positions are already populated in HTML, no need to fetch from API
+        console.log('Division selected:', divisionId);
     }
 }
 
@@ -543,8 +539,82 @@ function loadCompetencyLevel() {
     }
 }
 
-// Form validation
+// Filter jabatan berdasarkan level kompetensi yang dipilih
+function filterJabatanByLevel() {
+    const levelKompetensiSelect = document.getElementById('level_kompetensi');
+    const jabatanSelect = document.getElementById('jabatan');
+    const selectedOption = levelKompetensiSelect.options[levelKompetensiSelect.selectedIndex];
+    
+    // Jika level kompetensi kosong, tampilkan semua jabatan
+    if (!selectedOption || selectedOption.value === '') {
+        jabatanSelect.querySelectorAll('option').forEach(option => {
+            option.style.display = '';
+        });
+        return;
+    }
+    
+    // Ambil level number dari data-level attribute
+    const levelNumber = selectedOption.getAttribute('data-level');
+    const levelName = selectedOption.value.toLowerCase();
+    const optionText = selectedOption.textContent.toLowerCase();
+    
+    // Ambil jabatan yang sedang dipilih untuk pengecekan
+    const selectedJabatan = jabatanSelect.value;
+    
+    // Filter jabatan berdasarkan level
+    let allowedJabatans = [];
+    
+    // Cek apakah ini Level Umum (dari nama atau text option)
+    if (levelName.includes('umum') || optionText.includes('level umum') || optionText.includes('umum')) {
+        // Level Umum: semua jabatan bisa dipilih
+        allowedJabatans = ['manajer', 'supervisor', 'staff'];
+    } else if (levelNumber !== null && levelNumber !== '') {
+        const level = parseInt(levelNumber);
+        
+        if (level >= 1 && level <= 2) {
+            // Level 1-2: semua jabatan bisa dipilih
+            allowedJabatans = ['manajer', 'supervisor', 'staff'];
+        } else if (level >= 3 && level <= 4) {
+            // Level 3-4: hanya Supervisor(Asmen) dan Manajer
+            allowedJabatans = ['manajer', 'supervisor'];
+        } else if (level >= 5 && level <= 7) {
+            // Level 5-7: hanya Manajer
+            allowedJabatans = ['manajer'];
+        }
+    } else {
+        // Jika tidak ada level number, tampilkan semua jabatan (fallback)
+        allowedJabatans = ['manajer', 'supervisor', 'staff'];
+    }
+    
+    // Tampilkan atau sembunyikan option jabatan
+    jabatanSelect.querySelectorAll('option').forEach(option => {
+        if (option.value === '') {
+            // Option "Pilih Jabatan" selalu ditampilkan
+            option.style.display = '';
+        } else {
+            const jabatanType = option.getAttribute('data-jabatan');
+            if (allowedJabatans.includes(jabatanType)) {
+                option.style.display = '';
+            } else {
+                option.style.display = 'none';
+                // Jika jabatan yang dipilih tidak sesuai, reset ke kosong
+                if (option.value === selectedJabatan) {
+                    jabatanSelect.value = '';
+                }
+            }
+        }
+    });
+}
+
+// Form validation dan inisialisasi filter
 document.addEventListener('DOMContentLoaded', function() {
+    // Jalankan filter saat halaman dimuat jika level kompetensi sudah dipilih
+    const levelKompetensiSelect = document.getElementById('level_kompetensi');
+    if (levelKompetensiSelect && levelKompetensiSelect.value !== '') {
+        filterJabatanByLevel();
+    }
+    
+    // Form validation
     const form = document.querySelector('form');
     const inputs = form.querySelectorAll('input[required], select[required]');
     

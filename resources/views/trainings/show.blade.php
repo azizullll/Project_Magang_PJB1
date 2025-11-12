@@ -161,7 +161,7 @@
             <div class="detail-item">
                 <span class="detail-label">Level</span>
                 <span class="detail-value">
-                    <span class="level-badge">Level {{ $training->level }}</span>
+                    <span class="level-badge">{{ $training->level == 0 ? 'Umum' : 'Level ' . $training->level }}</span>
                 </span>
             </div>
         </div>
@@ -213,19 +213,13 @@
             <div class="detail-item">
                 <span class="detail-label">Divisi Relevan</span>
                 <span class="detail-value">
-                    @php
-                        $divisions = \App\Models\Division::whereIn('id', $training->relevant_divisions ?? [])->pluck('name')->toArray();
-                    @endphp
-                    {{ implode(', ', $divisions) }}
+                    {{ implode(', ', $training->relevant_divisions ?? []) }}
                 </span>
             </div>
             <div class="detail-item">
                 <span class="detail-label">Jabatan Relevan</span>
                 <span class="detail-value">
-                    @php
-                        $jobPositions = \App\Models\JobPosition::whereIn('id', $training->relevant_job_positions ?? [])->pluck('name')->toArray();
-                    @endphp
-                    {{ implode(', ', $jobPositions) }}
+                    {{ implode(', ', $training->relevant_job_positions ?? []) }}
                 </span>
             </div>
         </div>

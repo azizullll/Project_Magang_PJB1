@@ -234,9 +234,14 @@
                 <label for="divisi" class="form-label">Divisi <span style="color: #dc2626;">*</span></label>
                 <select id="divisi" name="divisi" class="form-select @error('divisi') is-invalid @enderror" required onchange="loadJobPositions()">
                     <option value="">Pilih Divisi</option>
-                    @foreach($divisions as $division)
-                        <option value="{{ $division->id }}" {{ old('divisi', $employee->divisi) == $division->name ? 'selected' : '' }}>{{ $division->name }}</option>
-                    @endforeach
+                    <option value="LINGKUNGAN" {{ old('divisi', $employee->divisi) == 'LINGKUNGAN' ? 'selected' : '' }}>LINGKUNGAN</option>
+                    <option value="SINFO" {{ old('divisi', $employee->divisi) == 'SINFO' ? 'selected' : '' }}>SINFO</option>
+                    <option value="INVENTORY" {{ old('divisi', $employee->divisi) == 'INVENTORY' ? 'selected' : '' }}>INVENTORY</option>
+                    <option value="SDM" {{ old('divisi', $employee->divisi) == 'SDM' ? 'selected' : '' }}>SDM</option>
+                    <option value="HAR" {{ old('divisi', $employee->divisi) == 'HAR' ? 'selected' : '' }}>HAR</option>
+                    <option value="ENGINEERING TO" {{ old('divisi', $employee->divisi) == 'ENGINEERING TO' ? 'selected' : '' }}>ENGINEERING TO</option>
+                    <option value="KEUANGAN" {{ old('divisi', $employee->divisi) == 'KEUANGAN' ? 'selected' : '' }}>KEUANGAN</option>
+                    <option value="SARANA" {{ old('divisi', $employee->divisi) == 'SARANA' ? 'selected' : '' }}>SARANA</option>
                 </select>
                 @error('divisi')
                     <div class="error-message">{{ $message }}</div>
@@ -246,7 +251,10 @@
             <div class="form-group">
                 <label for="jabatan" class="form-label">Jabatan <span style="color: #dc2626;">*</span></label>
                 <select id="jabatan" name="jabatan" class="form-select @error('jabatan') is-invalid @enderror" required onchange="loadCompetencyLevel()">
-                    <option value="">Pilih Divisi terlebih dahulu</option>
+                    <option value="">Pilih Jabatan</option>
+                    <option value="Manajer" {{ old('jabatan', $employee->jabatan) == 'Manajer' ? 'selected' : '' }}>Manajer</option>
+                    <option value="Supervisor(Asmen)" {{ old('jabatan', $employee->jabatan) == 'Supervisor(Asmen)' ? 'selected' : '' }}>Supervisor(Asmen)</option>
+                    <option value="Staff" {{ old('jabatan', $employee->jabatan) == 'Staff' ? 'selected' : '' }}>Staff</option>
                 </select>
                 @error('jabatan')
                     <div class="error-message">{{ $message }}</div>
@@ -504,25 +512,13 @@ function loadJobPositions() {
     const jobPositionSelect = document.getElementById('jabatan');
     const competencyLevelSelect = document.getElementById('level_kompetensi');
     
-    // Clear job positions and competency level
-    jobPositionSelect.innerHTML = '<option value="">Pilih Jabatan</option>';
+    // Clear competency level
     competencyLevelSelect.value = '';
     
+    // Job positions are now static for all divisions
     if (divisionId) {
-        fetch(`/api/job-positions-by-division?division_id=${divisionId}`)
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(job => {
-                    const option = document.createElement('option');
-                    option.value = job.name;
-                    option.textContent = job.name;
-                    option.setAttribute('data-competency-level', job.competency_level);
-                    jobPositionSelect.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error loading job positions:', error);
-            });
+        // Job positions are already populated in HTML, no need to fetch from API
+        console.log('Division selected:', divisionId);
     }
 }
 
@@ -630,11 +626,8 @@ function loadCompetencyLevel() {
 
 // Initialize form on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Load job positions if division is already selected
-    const divisionSelect = document.getElementById('divisi');
-    if (divisionSelect.value) {
-        loadJobPositions();
-    }
+    // Job positions are now static, no need to load them dynamically
+    console.log('Form initialized with static job positions');
 });
 
 // Form validation

@@ -326,10 +326,13 @@
             
         </ul>
         <div class="sidebar-footer">
-            <span class="logout-icon">
-                <i class="fas fa-sign-out-alt"></i>
-                Logout
-            </span>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit" class="logout-icon" style="background: none; border: 0;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </form>
         </div>
     </aside>
 

@@ -3,6 +3,7 @@
 // routes/web.php
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\CertificationController;
 use App\Http\Controllers\TrainingController;
@@ -14,9 +15,7 @@ Route::get('/', function () {
 });
 
 // Dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware('auth');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth');
 
 // Auth Routes
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -26,6 +25,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::resource('data-karyawan', EmployeeController::class)->parameters([
     'data-karyawan' => 'employee'
 ])->names('employees');
+
+// Route khusus untuk menangani foto karyawan (dihapus untuk sementara)
+// Route::get('/employee-photo/{filename}', [EmployeeController::class, 'getEmployeePhoto'])
+//     ->name('employee.photo');
 
 // Hapus sertifikat individual
 Route::delete('/employees/{employee}/certificates/{certification}', [EmployeeController::class, 'destroyCertificate'])
@@ -58,9 +61,25 @@ Route::get('/data-sertifikasi/create', [CertificationController::class, 'create'
 Route::post('/data-sertifikasi', [CertificationController::class, 'store'])->name('certifications.store');
 Route::get('/data-sertifikasi/{employee}', [CertificationController::class, 'show'])->name('certifications.show');
 
-// Delete specific certification for employee
+// Delete specific certification for employee (legacy Certification model)
 Route::delete('/data-sertifikasi/{employee}/certification/{certification}', [CertificationController::class, 'destroy'])
     ->name('certifications.destroy');
+
+// Delete specific training certification (employee_training pivot)
+Route::delete('/data-sertifikasi/{employee}/training/{training}', [CertificationController::class, 'destroyTraining'])
+    ->name('certifications.destroyTraining');
+
+// Edit training certification (employee_training pivot)
+Route::get('/data-sertifikasi/{employee}/training/{training}/edit', [CertificationController::class, 'editTraining'])
+    ->name('certifications.editTraining');
+Route::put('/data-sertifikasi/{employee}/training/{training}', [CertificationController::class, 'updateTraining'])
+    ->name('certifications.updateTraining');
+
+// Renew training certification (perpanjang sertifikasi)
+Route::get('/data-sertifikasi/{employee}/training/{training}/renew', [CertificationController::class, 'renewTrainingForm'])
+    ->name('certifications.renewTraining');
+Route::post('/data-sertifikasi/{employee}/training/{training}/renew', [CertificationController::class, 'renewTraining'])
+    ->name('certifications.updateRenew');
 
 // API untuk mendapatkan detail training
 Route::get('/api/training-details', [CertificationController::class, 'getTrainingDetails'])

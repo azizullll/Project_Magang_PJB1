@@ -23,6 +23,8 @@ class AuthController extends Controller
 
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
+            // Tampilkan notifikasi sekali setelah login berhasil
+            $request->session()->flash('just_logged_in', true);
             return redirect()->intended('/dashboard');
         }
 

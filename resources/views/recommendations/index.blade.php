@@ -289,7 +289,7 @@
             <option value="">Pilih karyawan untuk melihat rekomendasi</option>
             @foreach($employees as $employee)
                 <option value="{{ $employee->id }}">
-                    {{ $employee->nama_lengkap }} - {{ $employee->jabatan }} ({{ $employee->divisi }})
+                    {{ $employee->nama }} - {{ $employee->jabatan }} ({{ $employee->divisi }})
                 </option>
             @endforeach
         </select>
@@ -368,12 +368,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayEmployeeInfo(employee) {
         employeeDetails.innerHTML = `
-            <div><strong>Nama:</strong> ${employee.nama_lengkap}</div>
+            <div><strong>Nama:</strong> ${employee.nama}</div>
             <div><strong>NIP:</strong> ${employee.nip}</div>
             <div><strong>Jabatan:</strong> ${employee.jabatan}</div>
             <div><strong>Divisi:</strong> ${employee.divisi}</div>
-            <div><strong>Level Kompetensi:</strong> ${employee.level_kompetensi}</div>
-            <div><strong>Masa Kerja:</strong> ${employee.masa_kerja} tahun</div>
+            <div><strong>Level Kompetensi:</strong> ${employee.level_kompetensi || '-'}</div>
+            <div><strong>Masa Kerja:</strong> ${employee.masa_kerja_tahun || 0} tahun</div>
         `;
         employeeInfo.style.display = 'block';
     }
@@ -394,12 +394,17 @@ document.addEventListener('DOMContentLoaded', function() {
         recommendations.forEach(rec => {
             const priorityClass = getPriorityClass(rec.priority);
             const categoryClass = getCategoryClass(rec.training.category);
+            const levelText = rec.training.level === 0 ? 'Umum' : `Level ${rec.training.level}`;
+            const durationText = rec.training.duration_days 
+                ? `${rec.training.duration_days} hari` 
+                : (rec.training.duration_hours ? `${rec.training.duration_hours} jam` : 'TBD');
+            const priorityText = rec.priority === 'High' ? 'Tinggi' : (rec.priority === 'Medium' ? 'Sedang' : 'Rendah');
             
             html += `
                 <div class="recommendation-card">
                     <div class="recommendation-header">
                         <h3 class="recommendation-title">${rec.training.name}</h3>
-                        <span class="priority-badge ${priorityClass}">${rec.priority}</span>
+                        <span class="priority-badge ${priorityClass}">${priorityText}</span>
                     </div>
                     
                     <div class="recommendation-details">
@@ -416,12 +421,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="detail-item">
                             <span class="detail-label">Level</span>
                             <span class="detail-value">
-                                <span class="level-badge">Level ${rec.training.level}</span>
+                                <span class="level-badge">${levelText}</span>
                             </span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Durasi</span>
-                            <span class="detail-value">${rec.training.duration_days || rec.training.duration_hours || 'TBD'}</span>
+                            <span class="detail-value">${durationText}</span>
                         </div>
                         <div class="detail-item">
                             <span class="detail-label">Lembaga</span>
@@ -432,6 +437,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             <span class="detail-value">${rec.training.cost ? 'Rp ' + new Intl.NumberFormat('id-ID').format(rec.training.cost) : 'TBD'}</span>
                         </div>
                     </div>
+                    
+                    ${rec.training.competencies_gained ? `
+                    <div class="detail-item" style="margin-top: 10px;">
+                        <span class="detail-label">Kompetensi yang Diperoleh</span>
+                        <span class="detail-value" style="font-size: 13px;">${rec.training.competencies_gained}</span>
+                    </div>
+                    ` : ''}
                     
                     <div class="reasons">
                         <div class="reasons-title">Alasan Rekomendasi:</div>
@@ -447,10 +459,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function getPriorityClass(priority) {
-        switch(priority.toLowerCase()) {
-            case 'high': return 'priority-high';
-            case 'medium': return 'priority-medium';
-            case 'low': return 'priority-low';
+        // Priority sudah dalam format 'High', 'Medium', 'Low'
+        switch(priority) {
+            case 'High': return 'priority-high';
+            case 'Medium': return 'priority-medium';
+            case 'Low': return 'priority-low';
             default: return 'priority-medium';
         }
     }
